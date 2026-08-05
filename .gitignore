@@ -1,0 +1,26 @@
+# Build artifacts
+build/
+*.z64
+*.elf
+*.map
+*.o
+*.d
+*.dfs
+compile_commands.json
+
+# Libdragon generated
+.libdragon/
+.headers/
+
+# macOS junk
+.DS_Store
+.Spotlight-V100
+.Trashes
+
+# IDE / editor
+.cache/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~

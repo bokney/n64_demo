@@ -1,0 +1,19 @@
+CompileFlags:
+  Add:
+    - "--target=mipsel-none-elf"
+    - "-D__STDC_HOSTED__=0"
+    - "-isystem"
+    - "./libdragon/include"
+    - "-isystem"
+    - "./.headers/mips"
+    - "-D__N64__"
+  Remove:
+    - "-I/n64_toolchain/*"
+    - "-I/usr/mips64-elf/*"
+    - "-I/usr/local/mips64-elf/*"
+    - "-mabi=*"
+    - "-mgp*"
+    - "-march=*"
+    - "-mips*"
+    - "-mno-check-zero-division"
+    - "-mexplicit-relocs"
