@@ -1,4 +1,7 @@
 
+#ifndef INPUT_H
+#define INPUT_H
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <libdragon.h>
@@ -19,3 +22,5 @@ void input_update(void);
 bool input_action_pressed(InputAction action);
 bool input_action_held(InputAction action);
 bool input_action_released(InputAction action);
+
+#endif
