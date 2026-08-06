@@ -4,9 +4,9 @@ Nintendo 64 homebrew game template built with **libdragon**
 
 ## Features
 
-- **Fixed-timestep game loop** - WIP
+- **Fixed-timestep game loop**
 - **Phase-based state machine**
-- **ECS architecture** — WIP
+- **ECS architecture**
 - **RDPQ rendering**
 - **Decoupled input system**
 - **XM64 music streaming**
@@ -19,7 +19,7 @@ Nintendo 64 homebrew game template built with **libdragon**
 | Graphics | RDPQ (libdragon) |
 | Audio | libdragon mixer + XM64 player |
 | Build | Makefile + `n64.mk` |
-| Language | C |
+| Language | C99 (libdragon) |
 
 ## Building
 
@@ -35,11 +35,12 @@ Requires the libdragon submodule and N64 toolchain installed. See libdragon's RE
 ```
 src/
   main.c            — engine entry point, fixed-timestep loop
+  game.h            — game-specific types (StateID, etc.)
   state.c/h         — phase-based state machine
-  ecs.c/h           — ECS skeleton
+  ecs.c/h           — ECS: entity management, component storage, systems
   systems/
     input.c/h       — input abstraction, deadzones, edge detection
-    render.c/h      — RDPQ rendering system
+    render.c/h      — RDPQ rendering system, queries ECS for draw data
   states/
     splash_screen.* — splash screen with animated box + music
     title_screen.*  — title screen skeleton
