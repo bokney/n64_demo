@@ -1,35 +1,30 @@
 #include <stdio.h>
 #include <libdragon.h>
 
+#include "game.h"
 #include "state.h"
 #include "states/splash_screen.h"
 #include "states/title_screen.h"
 #include "states/main_menu.h"
+#include "ecs.h"
+#include "systems/render.h"
 #include "systems/input.h"
 
 #define LOGIC_RATE_HZ 60
 #define TICKS_PER_UPDATE (TICKS_PER_SECOND / LOGIC_RATE_HZ)
 
-typedef enum {
-    STATE_NONE = 0,
-    STATE_SPLASH = 1,
-    STATE_TITLE_SCREEN = 2,
-    STATE_MAIN_MENU = 3
-} StateID;
-
 void load_state(state *target, uint32_t state_id) {
     switch (state_id) {
         case STATE_SPLASH:
-            assign_state(target, splash_screen_init, splash_screen_update, splash_screen_draw, splash_screen_exit);
+            assign_state(target, splash_screen_init, splash_screen_update, splash_screen_exit);
             break;
         case STATE_TITLE_SCREEN:
-            assign_state(target, title_screen_init, title_screen_update, title_screen_draw, title_screen_exit);
+            assign_state(target, title_screen_init, title_screen_update, title_screen_exit);
             break;
         case STATE_MAIN_MENU:
-            assign_state(target, main_menu_init, main_menu_update, main_menu_draw, main_menu_exit);
+            assign_state(target, main_menu_init, main_menu_update, main_menu_exit);
             break;
         default:
-            // Unrecognized state - handle crash or fallback
             break;
     }
 }
@@ -62,8 +57,9 @@ int main(void) {
 
         while (accumulator >= TICKS_PER_UPDATE) {
             joypad_poll();
-	    input_update();
-            
+            input_update();
+            ecs_tick_logic();
+
             uint32_t next_state = state_update(&current_state);
 
             if (next_state != STATE_NONE) {
@@ -77,9 +73,9 @@ int main(void) {
         }
 
         surface_t* disp;
-        while(!(disp = display_try_get())); 
+        while(!(disp = display_try_get()));
         rdpq_attach_clear(disp, NULL);
-        state_draw(&current_state, disp);
+        render_tick(disp);
         rdpq_detach_show();
     }
 }
