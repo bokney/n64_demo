@@ -24,3 +24,10 @@ compile_commands.json
 *.swp
 *.swo
 *~
+
+# OpenCode tooling
+.opendcache/
+.opencode/
+
+# Raw asset sources (not tracked; only DFS-ready files in filesystem/ are)
+assets/
