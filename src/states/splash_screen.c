@@ -1,68 +1,53 @@
-
-#include <stdio.h>
-
 #include "splash_screen.h"
+#include "../ecs.h"
+#include "../game.h"
 #include "../systems/input.h"
 
 static xm64player_t music;
 static rdpq_font_t *custom_font;
-
-static int box_x = 100;
-static int box_y = 140;
+static entity_t box_entity;
+static entity_t text_entity;
 
 void splash_screen_init(void) {
     xm64player_open(&music, "rom:/audio/boomtiss.xm64");
     xm64player_play(&music, 0);
 
-    custom_font = rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO); 
+    custom_font = rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO);
     rdpq_text_register_font(1, custom_font);
-    
-    box_x = 100;
-    box_y = 140;
+
+    entity_t bg_entity = ecs_create_entity();
+    Transform bg_t = {0, 0};
+    Sprite bg_s = {320, 240, RGBA32(195, 167, 225, 0)};
+    ecs_add_transform(bg_entity, bg_t);
+    ecs_add_sprite(bg_entity, bg_s);
+
+    box_entity = ecs_create_entity();
+    Transform box_t = {100, 140};
+    Sprite box_s = {50, 50, RGBA32(149, 105, 200, 0)};
+    InputMover box_m = {2, ACTION_UP, ACTION_DOWN, ACTION_LEFT, ACTION_RIGHT};
+    ecs_add_transform(box_entity, box_t);
+    ecs_add_sprite(box_entity, box_s);
+    ecs_add_input_mover(box_entity, box_m);
+
+    text_entity = ecs_create_entity();
+    Transform text_t = {100, 100};
+    Text text_d = {"SPLASH SCREEN ACTIVE", 1, RGBA32(255, 255, 255, 255)};
+    ecs_add_transform(text_entity, text_t);
+    ecs_add_text(text_entity, text_d);
 }
 
 uint8_t splash_screen_update(void) {
-    int speed = 2;
-
-    if (input_action_held(ACTION_UP)) {
-        box_y -= speed;
-    }
-    if (input_action_held(ACTION_DOWN)) {
-        box_y += speed;
-    }
-    if (input_action_held(ACTION_LEFT)) {
-        box_x -= speed;
-    }
-    if (input_action_held(ACTION_RIGHT)) {
-        box_x += speed;
-    }
-
     if (input_action_pressed(ACTION_CONFIRM)) {
-        return 2;
+        return STATE_TITLE_SCREEN;
     }
-
     return 0;
-}
-
-void splash_screen_draw(surface_t *disp) {
-    rdpq_set_mode_fill(RGBA32(195, 167, 225, 0));
-    rdpq_fill_rectangle(0, 0, display_get_width(), display_get_height());
-
-    rdpq_set_mode_standard();
-
-    rdpq_text_printf(NULL, 1, 100, 100, "SPLASH SCREEN ACTIVE");
-    rdpq_text_printf(NULL, 1, 100, 120, "Hello World!");
-
-    rdpq_set_mode_fill(RGBA32(149, 105, 200, 0)); 
-    
-    rdpq_fill_rectangle(box_x, box_y, box_x + 50, box_y + 50);
 }
 
 uint8_t splash_screen_exit(void) {
     xm64player_stop(&music);
     xm64player_close(&music);
-
     rdpq_font_free(custom_font);
-
+    ecs_destroy_entity(box_entity);
+    ecs_destroy_entity(text_entity);
     return 0;
 }
