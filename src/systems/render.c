@@ -20,6 +20,17 @@ void render_tick(surface_t *disp) {
             rdpq_set_mode_standard();
             rdpq_text_printf(NULL, txt->font_id, t->x, t->y, "%s", txt->str);
         }
+
+        if (has_triangle[i]) {
+            Triangle *tri = &triangles[i];
+            rdpq_set_mode_standard();
+            rdpq_mode_combiner(RDPQ_COMBINER_FLAT);
+            rdpq_set_prim_color(tri->color);
+            float v1[] = {tri->v1x, tri->v1y};
+            float v2[] = {tri->v2x, tri->v2y};
+            float v3[] = {tri->v3x, tri->v3y};
+            rdpq_triangle(&TRIFMT_FILL, v1, v2, v3);
+        }
     }
 }
 
