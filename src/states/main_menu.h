@@ -6,5 +6,6 @@
 void main_menu_init(void);
 uint8_t main_menu_update(void);
 uint8_t main_menu_exit(void);
+void main_menu_render_3d(void);
 
 #endif

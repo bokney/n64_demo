@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <libdragon.h>
+#include <t3d/t3d.h>
 
 #include "game.h"
 #include "state.h"
@@ -32,6 +33,7 @@ void load_state(state *target, uint32_t state_id) {
 int main(void) {
     display_init(RESOLUTION_320x240, DEPTH_16_BPP, 3, GAMMA_NONE, FILTERS_RESAMPLE);
     rdpq_init();
+    t3d_init((T3DInitParams){});
     dfs_init(DFS_DEFAULT_LOCATION);
     audio_init(32000, 4);
     mixer_init(32);
@@ -39,6 +41,7 @@ int main(void) {
     timer_init();
 
     state current_state;
+    uint32_t current_state_id = STATE_SPLASH;
     load_state(&current_state, STATE_SPLASH);
 
     uint64_t current_time = timer_ticks();
@@ -63,6 +66,7 @@ int main(void) {
             uint32_t next_state = state_update(&current_state);
 
             if (next_state != STATE_NONE) {
+                current_state_id = next_state;
                 load_state(&current_state, next_state);
                 accumulator = 0;
                 current_time = timer_ticks();
@@ -74,8 +78,8 @@ int main(void) {
 
         surface_t* disp;
         while(!(disp = display_try_get()));
-        rdpq_attach_clear(disp, NULL);
-        render_tick(disp);
+        rdpq_attach_clear(disp, display_get_zbuf());
+        render_tick(disp, current_state_id);
         rdpq_detach_show();
     }
 }

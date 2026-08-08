@@ -1,8 +1,15 @@
 #include "render.h"
 #include "../ecs.h"
+#include <t3d/t3d.h>
+#include "../states/main_menu.h"
 
-void render_tick(surface_t *disp) {
+void render_tick(surface_t *disp, uint32_t state_id) {
     (void)disp;
+
+    if (state_id == STATE_MAIN_MENU) {
+        main_menu_render_3d();
+        return;
+    }
 
     for (int i = 0; i < MAX_ENTITIES; i++) {
         if (!entity_alive[i]) continue;
