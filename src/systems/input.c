@@ -20,6 +20,11 @@ void input_update(void) {
     if (port1.btn.d_down  || port1.stick_y < -STICK_DEADZONE) current_state |= (1 << ACTION_DOWN);
     if (port1.btn.d_left  || port1.stick_x < -STICK_DEADZONE) current_state |= (1 << ACTION_LEFT);
     if (port1.btn.d_right || port1.stick_x > STICK_DEADZONE)  current_state |= (1 << ACTION_RIGHT);
+
+    if (port1.btn.c_up)    current_state |= (1 << ACTION_C_UP);
+    if (port1.btn.c_down)  current_state |= (1 << ACTION_C_DOWN);
+    if (port1.btn.c_left)  current_state |= (1 << ACTION_C_LEFT);
+    if (port1.btn.c_right) current_state |= (1 << ACTION_C_RIGHT);
 }
 
 bool input_action_pressed(InputAction action) {

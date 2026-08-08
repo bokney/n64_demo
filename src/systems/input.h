@@ -14,6 +14,10 @@ typedef enum {
     ACTION_DOWN,
     ACTION_LEFT,
     ACTION_RIGHT,
+    ACTION_C_UP,
+    ACTION_C_DOWN,
+    ACTION_C_LEFT,
+    ACTION_C_RIGHT,
     ACTION_COUNT
 } InputAction;
 
