@@ -2,10 +2,9 @@ CompileFlags:
   Add:
     - "--target=mipsel-none-elf"
     - "-D__STDC_HOSTED__=0"
-    - "-isystem"
-    - "./libdragon/include"
-    - "-isystem"
-    - "./.headers/mips"
+    - "-isystem./libdragon/include"
+    - "-isystem./tiny3d/src"
+    - "-isystem./.headers/mips"
     - "-D__N64__"
   Remove:
     - "-I/n64_toolchain/*"
