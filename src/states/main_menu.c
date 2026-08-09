@@ -1,6 +1,5 @@
 #include "main_menu.h"
 #include "../ecs.h"
-#include "../game.h"
 #include "../systems/input.h"
 #include <t3d/t3d.h>
 #include <t3d/t3dmodel.h>
@@ -10,7 +9,6 @@
 #define MODEL_SCALE 0.1f
 
 static T3DModel *cube_model = NULL;
-static T3DViewport viewport;
 static T3DMat4FP *model_mats = NULL;
 static int frame_idx = 0;
 
@@ -23,85 +21,100 @@ static const uint8_t color_dir[4]     = {0xEE, 0xAA, 0xAA, 0xFF};
 #define CAM_PITCH_MIN    T3D_DEG_TO_RAD(-85.0f)
 #define CAM_PITCH_MAX    T3D_DEG_TO_RAD(85.0f)
 
-static fm_vec3_t cam_pos    = {{0.0f, 12.0f, 25.0f}};
-static fm_vec3_t cam_target = {{0.0f, 0.0f, 0.0f}};
+static entity_t cam_entity = MAX_ENTITIES;
+static entity_t cam_target_entity = MAX_ENTITIES;
 
 void main_menu_init(void) {
     cube_model = t3d_model_load("rom:/models/colourful_cube.t3dm");
 
-    viewport = t3d_viewport_create_buffered(FB_COUNT);
-    t3d_viewport_set_projection(&viewport, T3D_DEG_TO_RAD(60.0f), 10.0f, 150.0f);
+    cam_target_entity = ecs_create_entity();
+    ecs_add_position(cam_target_entity, (Position){0.0f, 0.0f, 0.0f});
 
-    t3d_viewport_look_at(&viewport, &cam_pos, &cam_target, &(fm_vec3_t){{0,1,0}});
+    cam_entity = ecs_create_entity();
+    ecs_add_position(cam_entity, (Position){0.0f, 12.0f, 25.0f});
+    ecs_add_camera(cam_entity, (Camera){
+        .forward = {{0.0f, -0.447f, -0.894f}},
+        .up = {{0.0f, 1.0f, 0.0f}},
+        .fov = T3D_DEG_TO_RAD(60.0f),
+        .near = 10.0f,
+        .far = 150.0f,
+        .is_ortho = false,
+        .is_active = true
+    });
+    ecs_add_camera_behavior(cam_entity, (CameraBehavior){
+        .type = CAMERA_BEHAVIOR_ORBIT,
+        .orbit = {
+            .target = cam_target_entity,
+            .distance = 25.0f,
+            .yaw = 0.0f,
+            .pitch = -0.44f,
+            .min_pitch = CAM_PITCH_MIN,
+            .max_pitch = CAM_PITCH_MAX
+        }
+    });
 
     model_mats = malloc_uncached(sizeof(T3DMat4FP) * FB_COUNT);
     frame_idx = 0;
 }
 
 uint8_t main_menu_update(void) {
+    CameraBehavior *cb = ecs_get_camera_behavior(cam_entity);
+    if (!cb) return 0;
+
     bool turning = input_action_held(ACTION_C_LEFT)  || input_action_held(ACTION_C_RIGHT) ||
                    input_action_held(ACTION_C_UP)    || input_action_held(ACTION_C_DOWN);
     if (turning) {
-        fm_vec3_t offset;
-        fm_vec3_sub(&offset, &cam_pos, &cam_target);
-        float dist = fm_vec3_len(&offset);
-        if (dist > 0.001f) {
-            float yaw   = atan2f(offset.v[0], offset.v[2]);
-            float pitch = asinf(offset.v[1] / dist);
+        if (input_action_held(ACTION_C_LEFT))  cb->orbit.yaw   -= CAM_TURN_SPEED;
+        if (input_action_held(ACTION_C_RIGHT)) cb->orbit.yaw   += CAM_TURN_SPEED;
+        if (input_action_held(ACTION_C_UP))    cb->orbit.pitch += CAM_TURN_SPEED;
+        if (input_action_held(ACTION_C_DOWN))  cb->orbit.pitch -= CAM_TURN_SPEED;
 
-            if (input_action_held(ACTION_C_LEFT))  yaw   -= CAM_TURN_SPEED;
-            if (input_action_held(ACTION_C_RIGHT)) yaw   += CAM_TURN_SPEED;
-            if (input_action_held(ACTION_C_UP))    pitch += CAM_TURN_SPEED;
-            if (input_action_held(ACTION_C_DOWN))  pitch -= CAM_TURN_SPEED;
-
-            if (pitch > CAM_PITCH_MAX) pitch = CAM_PITCH_MAX;
-            if (pitch < CAM_PITCH_MIN) pitch = CAM_PITCH_MIN;
-
-            float cp = fm_cosf(pitch);
-            cam_pos.v[0] = cam_target.v[0] + dist * cp * fm_sinf(yaw);
-            cam_pos.v[1] = cam_target.v[1] + dist * fm_sinf(pitch);
-            cam_pos.v[2] = cam_target.v[2] + dist * cp * fm_cosf(yaw);
-        }
+        if (cb->orbit.pitch > cb->orbit.max_pitch) cb->orbit.pitch = cb->orbit.max_pitch;
+        if (cb->orbit.pitch < cb->orbit.min_pitch) cb->orbit.pitch = cb->orbit.min_pitch;
     }
 
     if (input_action_held(ACTION_CONFIRM)) {
-        fm_vec3_t look;
-        fm_vec3_sub(&look, &cam_target, &cam_pos);
-        float horiz_len = sqrtf(look.v[0] * look.v[0] + look.v[2] * look.v[2]);
-        if (horiz_len > 0.001f) {
+        Position *target_pos = ecs_get_position(cam_target_entity);
+        if (target_pos) {
+            float yaw = cb->orbit.yaw;
+            float cp = fm_cosf(cb->orbit.pitch);
+            fm_vec3_t forward = {
+                .v = {cp * fm_sinf(yaw), fm_sinf(cb->orbit.pitch), cp * fm_cosf(yaw)}
+            };
+            fm_vec3_norm(&forward, &forward);
+
+            fm_vec3_t right = {
+                .v = {forward.v[2], 0.0f, -forward.v[0]}
+            };
+            fm_vec3_norm(&right, &right);
+
             if (input_action_held(ACTION_LEFT)) {
-                cam_pos.v[0] -= look.v[2] / horiz_len * CAM_STRAFE_SPEED;
-                cam_pos.v[2] += look.v[0] / horiz_len * CAM_STRAFE_SPEED;
+                target_pos->x -= right.v[0] * CAM_STRAFE_SPEED;
+                target_pos->z -= right.v[2] * CAM_STRAFE_SPEED;
             }
             if (input_action_held(ACTION_RIGHT)) {
-                cam_pos.v[0] += look.v[2] / horiz_len * CAM_STRAFE_SPEED;
-                cam_pos.v[2] -= look.v[0] / horiz_len * CAM_STRAFE_SPEED;
+                target_pos->x += right.v[0] * CAM_STRAFE_SPEED;
+                target_pos->z += right.v[2] * CAM_STRAFE_SPEED;
             }
         }
     }
 
     if (input_action_held(ACTION_CANCEL)) {
-        if (input_action_held(ACTION_UP)) {
-            cam_pos.v[1] += CAM_VERT_SPEED;
-        }
-        if (input_action_held(ACTION_DOWN)) {
-            cam_pos.v[1] -= CAM_VERT_SPEED;
+        Position *target_pos = ecs_get_position(cam_target_entity);
+        if (target_pos) {
+            if (input_action_held(ACTION_UP)) {
+                target_pos->y += CAM_VERT_SPEED;
+            }
+            if (input_action_held(ACTION_DOWN)) {
+                target_pos->y -= CAM_VERT_SPEED;
+            }
         }
     }
 
-    t3d_viewport_look_at(&viewport, &cam_pos, &cam_target, &(fm_vec3_t){{0,1,0}});
-
-    bool any_dir = input_action_held(ACTION_LEFT)  || input_action_held(ACTION_RIGHT) ||
-                   input_action_held(ACTION_UP)    || input_action_held(ACTION_DOWN);
-    /*
-    if (input_action_pressed(ACTION_CONFIRM) && !any_dir) {
-        return STATE_SPLASH;
-    }
-    */
     return 0;
 }
 
-void main_menu_render_3d(void) {
+void main_menu_render_3d(T3DViewport *viewport) {
     if (cube_model == NULL) return;
 
     frame_idx = (frame_idx + 1) % FB_COUNT;
@@ -113,7 +126,7 @@ void main_menu_render_3d(void) {
     );
 
     t3d_frame_start();
-    t3d_viewport_attach(&viewport);
+    t3d_viewport_attach(viewport);
 
     t3d_screen_clear_color(RGBA32(0x3f, 0x3f, 0x74, 0xff));
     t3d_screen_clear_depth();
@@ -138,6 +151,13 @@ uint8_t main_menu_exit(void) {
         free_uncached(model_mats);
         model_mats = NULL;
     }
-    t3d_viewport_destroy(&viewport);
+    if (cam_entity != MAX_ENTITIES) {
+        ecs_destroy_entity(cam_entity);
+        cam_entity = MAX_ENTITIES;
+    }
+    if (cam_target_entity != MAX_ENTITIES) {
+        ecs_destroy_entity(cam_target_entity);
+        cam_target_entity = MAX_ENTITIES;
+    }
     return 0;
 }
