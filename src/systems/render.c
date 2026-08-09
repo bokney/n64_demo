@@ -1,13 +1,25 @@
 #include "render.h"
 #include "../ecs.h"
+#include "../systems/camera.h"
 #include <t3d/t3d.h>
 #include "../states/main_menu.h"
+
+#define FB_COUNT 3
+
+static T3DViewport viewport;
+static bool viewport_initialized = false;
 
 void render_tick(surface_t *disp, uint32_t state_id) {
     (void)disp;
 
+    if (!viewport_initialized) {
+        viewport = t3d_viewport_create_buffered(FB_COUNT);
+        viewport_initialized = true;
+    }
+
     if (state_id == STATE_MAIN_MENU) {
-        main_menu_render_3d();
+        camera_system_tick(&viewport);
+        main_menu_render_3d(&viewport);
         return;
     }
 
