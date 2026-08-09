@@ -1,7 +1,14 @@
 #include "ecs.h"
 
-Transform transforms[MAX_ENTITIES];
-bool has_transform[MAX_ENTITIES];
+Position positions[MAX_ENTITIES];
+bool has_position[MAX_ENTITIES];
+Rotation rotations[MAX_ENTITIES];
+bool has_rotation[MAX_ENTITIES];
+Scale scales[MAX_ENTITIES];
+bool has_scale[MAX_ENTITIES];
+Camera cameras[MAX_ENTITIES];
+bool has_camera[MAX_ENTITIES];
+
 Sprite sprites[MAX_ENTITIES];
 bool has_sprite[MAX_ENTITIES];
 Text texts[MAX_ENTITIES];
@@ -16,7 +23,10 @@ entity_t ecs_create_entity(void) {
     for (int i = 0; i < MAX_ENTITIES; i++) {
         if (!entity_alive[i]) {
             entity_alive[i] = true;
-            has_transform[i] = false;
+            has_position[i] = false;
+            has_rotation[i] = false;
+            has_scale[i] = false;
+            has_camera[i] = false;
             has_sprite[i] = false;
             has_text[i] = false;
             has_triangle[i] = false;
@@ -29,21 +39,99 @@ entity_t ecs_create_entity(void) {
 
 void ecs_destroy_entity(entity_t e) {
     entity_alive[e] = false;
-    has_transform[e] = false;
+    has_position[e] = false;
+    has_rotation[e] = false;
+    has_scale[e] = false;
+    has_camera[e] = false;
     has_sprite[e] = false;
     has_text[e] = false;
     has_triangle[e] = false;
     has_input_mover[e] = false;
 }
 
-void ecs_add_transform(entity_t e, Transform t) {
-    transforms[e] = t;
-    has_transform[e] = true;
+void ecs_add_position(entity_t e, Position p) {
+    positions[e] = p;
+    has_position[e] = true;
 }
 
-void ecs_add_sprite(entity_t e, Sprite t) {
-    sprites[e] = t;
+void ecs_remove_position(entity_t e) {
+    has_position[e] = false;
+}
+
+bool ecs_has_position(entity_t e) {
+    return has_position[e];
+}
+
+Position *ecs_get_position(entity_t e) {
+    return &positions[e];
+}
+
+void ecs_add_rotation(entity_t e, Rotation r) {
+    rotations[e] = r;
+    has_rotation[e] = true;
+}
+
+void ecs_remove_rotation(entity_t e) {
+    has_rotation[e] = false;
+}
+
+bool ecs_has_rotation(entity_t e) {
+    return has_rotation[e];
+}
+
+Rotation *ecs_get_rotation(entity_t e) {
+    return &rotations[e];
+}
+
+void ecs_add_scale(entity_t e, Scale s) {
+    scales[e] = s;
+    has_scale[e] = true;
+}
+
+void ecs_remove_scale(entity_t e) {
+    has_scale[e] = false;
+}
+
+bool ecs_has_scale(entity_t e) {
+    return has_scale[e];
+}
+
+Scale *ecs_get_scale(entity_t e) {
+    return &scales[e];
+}
+
+void ecs_add_camera(entity_t e, Camera c) {
+    cameras[e] = c;
+    has_camera[e] = true;
+}
+
+void ecs_remove_camera(entity_t e) {
+    has_camera[e] = false;
+}
+
+bool ecs_has_camera(entity_t e) {
+    return has_camera[e];
+}
+
+Camera *ecs_get_camera(entity_t e) {
+    return &cameras[e];
+}
+
+void ecs_add_sprite(entity_t e, Sprite s) {
+    sprites[e] = s;
     has_sprite[e] = true;
+}
+
+void ecs_remove_sprite(entity_t e) {
+    has_sprite[e] = false;
+}
+
+bool ecs_has_sprite(entity_t e) {
+    return has_sprite[e];
+}
+
+Sprite *ecs_get_sprite(entity_t e) {
+    return &sprites[e];
 }
 
 void ecs_add_text(entity_t e, Text t) {
@@ -51,70 +139,46 @@ void ecs_add_text(entity_t e, Text t) {
     has_text[e] = true;
 }
 
-void ecs_add_triangle(entity_t e, Triangle t) {
-    triangles[e] = t;
-    has_triangle[e] = true;
-}
-
-void ecs_add_input_mover(entity_t e, InputMover t) {
-    input_movers[e] = t;
-    has_input_mover[e] = true;
-}
-
-void ecs_remove_transform(entity_t e) {
-    has_transform[e] = false;
-}
-
-void ecs_remove_sprite(entity_t e) {
-    has_sprite[e] = false;
-}
-
 void ecs_remove_text(entity_t e) {
     has_text[e] = false;
-}
-
-void ecs_remove_triangle(entity_t e) {
-    has_triangle[e] = false;
-}
-
-void ecs_remove_input_mover(entity_t e) {
-    has_input_mover[e] = false;
-}
-
-bool ecs_has_transform(entity_t e) {
-    return has_transform[e];
-}
-
-bool ecs_has_sprite(entity_t e) {
-    return has_sprite[e];
 }
 
 bool ecs_has_text(entity_t e) {
     return has_text[e];
 }
 
-bool ecs_has_triangle(entity_t e) {
-    return has_triangle[e];
-}
-
-bool ecs_has_input_mover(entity_t e) {
-    return has_input_mover[e];
-}
-
-Transform *ecs_get_transform(entity_t e) {
-    return &transforms[e];
-}
-
-Sprite *ecs_get_sprite(entity_t e) {
-    return &sprites[e];
-}
-
 Text *ecs_get_text(entity_t e) {
     return &texts[e];
 }
 
+void ecs_add_triangle(entity_t e, Triangle t) {
+    triangles[e] = t;
+    has_triangle[e] = true;
+}
+
+void ecs_remove_triangle(entity_t e) {
+    has_triangle[e] = false;
+}
+
+bool ecs_has_triangle(entity_t e) {
+    return has_triangle[e];
+}
+
 Triangle *ecs_get_triangle(entity_t e) {
     return &triangles[e];
+}
+
+void ecs_add_input_mover(entity_t e, InputMover m) {
+    input_movers[e] = m;
+    has_input_mover[e] = true;
+}
+
+void ecs_remove_input_mover(entity_t e) {
+    has_input_mover[e] = false;
+}
+
+bool ecs_has_input_mover(entity_t e) {
+    return has_input_mover[e];
 }
 
 InputMover *ecs_get_input_mover(entity_t e) {
@@ -123,22 +187,22 @@ InputMover *ecs_get_input_mover(entity_t e) {
 
 void ecs_tick_logic(void) {
     for (int i = 0; i < MAX_ENTITIES; i++) {
-        if (!entity_alive[i] || !has_transform[i] || !has_input_mover[i]) {
+        if (!entity_alive[i] || !has_position[i] || !has_input_mover[i]) {
             continue;
         }
         InputMover *mover = &input_movers[i];
-        Transform *t = &transforms[i];
+        Position *p = &positions[i];
         if (input_action_held(mover->move_up)) {
-            t->y -= mover->speed;
+            p->y -= mover->speed;
         }
         if (input_action_held(mover->move_down)) {
-            t->y += mover->speed;
+            p->y += mover->speed;
         }
         if (input_action_held(mover->move_left)) {
-            t->x -= mover->speed;
+            p->x -= mover->speed;
         }
         if (input_action_held(mover->move_right)) {
-            t->x += mover->speed;
+            p->x += mover->speed;
         }
     }
 }
