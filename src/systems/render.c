@@ -14,18 +14,18 @@ void render_tick(surface_t *disp, uint32_t state_id) {
     for (int i = 0; i < MAX_ENTITIES; i++) {
         if (!entity_alive[i]) continue;
 
-        if (has_transform[i] && has_sprite[i]) {
+        if (has_position[i] && has_sprite[i]) {
             Sprite *s = &sprites[i];
-            Transform *t = &transforms[i];
+            Position *p = &positions[i];
             rdpq_set_mode_fill(s->color);
-            rdpq_fill_rectangle(t->x, t->y, t->x + s->w, t->y + s->h);
+            rdpq_fill_rectangle((int)p->x, (int)p->y, (int)(p->x + s->w), (int)(p->y + s->h));
         }
 
-        if (has_transform[i] && has_text[i]) {
+        if (has_position[i] && has_text[i]) {
             Text *txt = &texts[i];
-            Transform *t = &transforms[i];
+            Position *p = &positions[i];
             rdpq_set_mode_standard();
-            rdpq_text_printf(NULL, txt->font_id, t->x, t->y, "%s", txt->str);
+            rdpq_text_printf(NULL, txt->font_id, (int)p->x, (int)p->y, "%s", txt->str);
         }
 
         if (has_triangle[i]) {
@@ -40,4 +40,3 @@ void render_tick(surface_t *disp, uint32_t state_id) {
         }
     }
 }
-
