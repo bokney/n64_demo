@@ -20,7 +20,24 @@ typedef struct {
     float near, far;
     float left, right, top, bottom;
     bool is_ortho;
+    bool is_active;
 } Camera;
+
+typedef enum {
+    CAMERA_BEHAVIOR_NONE = 0,
+    CAMERA_BEHAVIOR_ORBIT,
+    CAMERA_BEHAVIOR_FOLLOW,
+    CAMERA_BEHAVIOR_STATIC,
+} CameraBehaviorType;
+
+typedef struct {
+    CameraBehaviorType type;
+    union {
+        struct { entity_t target; float distance; float yaw; float pitch; float min_pitch, max_pitch; } orbit;
+        struct { entity_t target; fm_vec3_t offset; float lerp_speed; } follow;
+        struct { } static_cam;
+    };
+} CameraBehavior;
 
 typedef struct { uint16_t w, h; color_t color; } Sprite;
 typedef struct { const char *str; int font_id; color_t color; } Text;
@@ -35,6 +52,8 @@ extern Scale scales[MAX_ENTITIES];
 extern bool has_scale[MAX_ENTITIES];
 extern Camera cameras[MAX_ENTITIES];
 extern bool has_camera[MAX_ENTITIES];
+extern CameraBehavior camera_behaviors[MAX_ENTITIES];
+extern bool has_camera_behavior[MAX_ENTITIES];
 
 extern Sprite sprites[MAX_ENTITIES];
 extern bool has_sprite[MAX_ENTITIES];
@@ -65,6 +84,11 @@ void ecs_add_camera(entity_t e, Camera c);
 void ecs_remove_camera(entity_t e);
 bool ecs_has_camera(entity_t e);
 Camera *ecs_get_camera(entity_t e);
+
+void ecs_add_camera_behavior(entity_t e, CameraBehavior cb);
+void ecs_remove_camera_behavior(entity_t e);
+bool ecs_has_camera_behavior(entity_t e);
+CameraBehavior *ecs_get_camera_behavior(entity_t e);
 
 void ecs_add_sprite(entity_t e, Sprite s);
 void ecs_remove_sprite(entity_t e);

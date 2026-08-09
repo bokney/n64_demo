@@ -8,6 +8,8 @@ Scale scales[MAX_ENTITIES];
 bool has_scale[MAX_ENTITIES];
 Camera cameras[MAX_ENTITIES];
 bool has_camera[MAX_ENTITIES];
+CameraBehavior camera_behaviors[MAX_ENTITIES];
+bool has_camera_behavior[MAX_ENTITIES];
 
 Sprite sprites[MAX_ENTITIES];
 bool has_sprite[MAX_ENTITIES];
@@ -27,6 +29,7 @@ entity_t ecs_create_entity(void) {
             has_rotation[i] = false;
             has_scale[i] = false;
             has_camera[i] = false;
+            has_camera_behavior[i] = false;
             has_sprite[i] = false;
             has_text[i] = false;
             has_triangle[i] = false;
@@ -43,6 +46,7 @@ void ecs_destroy_entity(entity_t e) {
     has_rotation[e] = false;
     has_scale[e] = false;
     has_camera[e] = false;
+    has_camera_behavior[e] = false;
     has_sprite[e] = false;
     has_text[e] = false;
     has_triangle[e] = false;
@@ -115,6 +119,23 @@ bool ecs_has_camera(entity_t e) {
 
 Camera *ecs_get_camera(entity_t e) {
     return &cameras[e];
+}
+
+void ecs_add_camera_behavior(entity_t e, CameraBehavior cb) {
+    camera_behaviors[e] = cb;
+    has_camera_behavior[e] = true;
+}
+
+void ecs_remove_camera_behavior(entity_t e) {
+    has_camera_behavior[e] = false;
+}
+
+bool ecs_has_camera_behavior(entity_t e) {
+    return has_camera_behavior[e];
+}
+
+CameraBehavior *ecs_get_camera_behavior(entity_t e) {
+    return &camera_behaviors[e];
 }
 
 void ecs_add_sprite(entity_t e, Sprite s) {
