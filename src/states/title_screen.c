@@ -33,9 +33,9 @@ void title_screen_init(void) {
     elapsed = 0.0f;
 
     bg_entity = ecs_create_entity();
-    Transform bg_t = {0, 0};
+    Position bg_p = {0.0f, 0.0f, 0.0f};
     Sprite bg_s = {320, 240, RGBA32(0x3f, 0x3f, 0x74, 0xff)};
-    ecs_add_transform(bg_entity, bg_t);
+    ecs_add_position(bg_entity, bg_p);
     ecs_add_sprite(bg_entity, bg_s);
 
     tri_entity = ecs_create_entity();
