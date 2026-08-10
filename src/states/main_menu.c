@@ -7,6 +7,10 @@
 #define FB_COUNT 3
 
 #define MODEL_SCALE 0.1f
+#define MODEL_ROT_SPEED  0.03f
+#define CAM_FOV_SPEED    1.0f
+#define CAM_FOV_MIN      20.0f
+#define CAM_FOV_MAX      90.0f
 
 static T3DModel *cube_model = NULL;
 static T3DMat4FP *model_mats = NULL;
@@ -15,20 +19,13 @@ static int frame_idx = 0;
 static const uint8_t color_ambient[4] = {80, 80, 100, 0xFF};
 static const uint8_t color_dir[4]     = {0xEE, 0xAA, 0xAA, 0xFF};
 
-#define CAM_TURN_SPEED   0.06f
-#define CAM_STRAFE_SPEED 1.5f
-#define CAM_VERT_SPEED   1.5f
-#define CAM_PITCH_MIN    T3D_DEG_TO_RAD(-85.0f)
-#define CAM_PITCH_MAX    T3D_DEG_TO_RAD(85.0f)
-
+static float model_yaw = 0.0f;
+static float model_pitch = 0.0f;
+static float model_roll = 0.0f;
 static entity_t cam_entity = MAX_ENTITIES;
-static entity_t cam_target_entity = MAX_ENTITIES;
 
 void main_menu_init(void) {
     cube_model = t3d_model_load("rom:/models/colourful_cube.t3dm");
-
-    cam_target_entity = ecs_create_entity();
-    ecs_add_position(cam_target_entity, (Position){0.0f, 0.0f, 0.0f});
 
     cam_entity = ecs_create_entity();
     ecs_add_position(cam_entity, (Position){0.0f, 12.0f, 25.0f});
@@ -41,74 +38,38 @@ void main_menu_init(void) {
         .is_ortho = false,
         .is_active = true
     });
-    ecs_add_camera_behavior(cam_entity, (CameraBehavior){
-        .type = CAMERA_BEHAVIOR_ORBIT,
-        .orbit = {
-            .target = cam_target_entity,
-            .distance = 25.0f,
-            .yaw = 0.0f,
-            .pitch = -0.44f,
-            .min_pitch = CAM_PITCH_MIN,
-            .max_pitch = CAM_PITCH_MAX
-        }
-    });
 
     model_mats = malloc_uncached(sizeof(T3DMat4FP) * FB_COUNT);
     frame_idx = 0;
 }
 
 uint8_t main_menu_update(void) {
-    CameraBehavior *cb = ecs_get_camera_behavior(cam_entity);
-    if (!cb) return 0;
+    Camera *cam = ecs_get_camera(cam_entity);
+    if (!cam) return 0;
 
-    bool turning = input_action_held(ACTION_C_LEFT)  || input_action_held(ACTION_C_RIGHT) ||
-                   input_action_held(ACTION_C_UP)    || input_action_held(ACTION_C_DOWN);
-    if (turning) {
-        if (input_action_held(ACTION_C_LEFT))  cb->orbit.yaw   -= CAM_TURN_SPEED;
-        if (input_action_held(ACTION_C_RIGHT)) cb->orbit.yaw   += CAM_TURN_SPEED;
-        if (input_action_held(ACTION_C_UP))    cb->orbit.pitch += CAM_TURN_SPEED;
-        if (input_action_held(ACTION_C_DOWN))  cb->orbit.pitch -= CAM_TURN_SPEED;
+    // Model rotation via C-buttons
+    if (input_action_held(ACTION_C_LEFT))  model_yaw   += MODEL_ROT_SPEED;
+    if (input_action_held(ACTION_C_RIGHT)) model_yaw   -= MODEL_ROT_SPEED;
+    if (input_action_held(ACTION_C_UP))    model_pitch += MODEL_ROT_SPEED;
+    if (input_action_held(ACTION_C_DOWN))  model_pitch -= MODEL_ROT_SPEED;
 
-        if (cb->orbit.pitch > cb->orbit.max_pitch) cb->orbit.pitch = cb->orbit.max_pitch;
-        if (cb->orbit.pitch < cb->orbit.min_pitch) cb->orbit.pitch = cb->orbit.min_pitch;
+    // Model roll via shoulder buttons
+    if (input_action_held(ACTION_L)) model_roll -= MODEL_ROT_SPEED;
+    if (input_action_held(ACTION_R)) model_roll += MODEL_ROT_SPEED;
+
+    // Camera FOV zoom via control stick up/down (Lakitu style)
+    if (input_action_held(ACTION_UP)) {
+        cam->fov -= CAM_FOV_SPEED * T3D_DEG_TO_RAD(1.0f);
+        if (cam->fov < T3D_DEG_TO_RAD(CAM_FOV_MIN)) cam->fov = T3D_DEG_TO_RAD(CAM_FOV_MIN);
+    }
+    if (input_action_held(ACTION_DOWN)) {
+        cam->fov += CAM_FOV_SPEED * T3D_DEG_TO_RAD(1.0f);
+        if (cam->fov > T3D_DEG_TO_RAD(CAM_FOV_MAX)) cam->fov = T3D_DEG_TO_RAD(CAM_FOV_MAX);
     }
 
-    if (input_action_held(ACTION_CONFIRM)) {
-        Position *target_pos = ecs_get_position(cam_target_entity);
-        if (target_pos) {
-            float yaw = cb->orbit.yaw;
-            float cp = fm_cosf(cb->orbit.pitch);
-            fm_vec3_t forward = {
-                .v = {cp * fm_sinf(yaw), fm_sinf(cb->orbit.pitch), cp * fm_cosf(yaw)}
-            };
-            fm_vec3_norm(&forward, &forward);
-
-            fm_vec3_t right = {
-                .v = {forward.v[2], 0.0f, -forward.v[0]}
-            };
-            fm_vec3_norm(&right, &right);
-
-            if (input_action_held(ACTION_LEFT)) {
-                target_pos->x -= right.v[0] * CAM_STRAFE_SPEED;
-                target_pos->z -= right.v[2] * CAM_STRAFE_SPEED;
-            }
-            if (input_action_held(ACTION_RIGHT)) {
-                target_pos->x += right.v[0] * CAM_STRAFE_SPEED;
-                target_pos->z += right.v[2] * CAM_STRAFE_SPEED;
-            }
-        }
-    }
-
-    if (input_action_held(ACTION_CANCEL)) {
-        Position *target_pos = ecs_get_position(cam_target_entity);
-        if (target_pos) {
-            if (input_action_held(ACTION_UP)) {
-                target_pos->y += CAM_VERT_SPEED;
-            }
-            if (input_action_held(ACTION_DOWN)) {
-                target_pos->y -= CAM_VERT_SPEED;
-            }
-        }
+    // Reset model rotation
+    if (input_action_pressed(ACTION_CONFIRM)) {
+        model_yaw = model_pitch = model_roll = 0.0f;
     }
 
     return 0;
@@ -121,7 +82,7 @@ void main_menu_render_3d(T3DViewport *viewport) {
 
     t3d_mat4fp_from_srt_euler(&model_mats[frame_idx],
         (float[3]){MODEL_SCALE, MODEL_SCALE, MODEL_SCALE},
-        (float[3]){0.0f, 0.0f, 0.0f},
+        (float[3]){model_pitch, model_yaw, model_roll},
         (float[3]){0.0f, 0.0f, 0.0f}
     );
 
@@ -154,10 +115,6 @@ uint8_t main_menu_exit(void) {
     if (cam_entity != MAX_ENTITIES) {
         ecs_destroy_entity(cam_entity);
         cam_entity = MAX_ENTITIES;
-    }
-    if (cam_target_entity != MAX_ENTITIES) {
-        ecs_destroy_entity(cam_target_entity);
-        cam_target_entity = MAX_ENTITIES;
     }
     return 0;
 }
