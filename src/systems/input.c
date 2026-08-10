@@ -25,6 +25,8 @@ void input_update(void) {
     if (port1.btn.c_down)  current_state |= (1 << ACTION_C_DOWN);
     if (port1.btn.c_left)  current_state |= (1 << ACTION_C_LEFT);
     if (port1.btn.c_right) current_state |= (1 << ACTION_C_RIGHT);
+    if (port1.btn.l)       current_state |= (1 << ACTION_L);
+    if (port1.btn.r)       current_state |= (1 << ACTION_R);
 }
 
 bool input_action_pressed(InputAction action) {
