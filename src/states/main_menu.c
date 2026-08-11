@@ -1,6 +1,7 @@
 #include "main_menu.h"
 #include "../ecs.h"
 #include "../systems/input.h"
+#include "../game.h"
 #include <t3d/t3d.h>
 #include <t3d/t3dmodel.h>
 
@@ -70,6 +71,11 @@ uint8_t main_menu_update(void) {
     // Reset model rotation
     if (input_action_pressed(ACTION_CONFIRM)) {
         model_yaw = model_pitch = model_roll = 0.0f;
+    }
+
+    // Start gameplay
+    if (input_action_pressed(ACTION_PAUSE)) {
+        return STATE_GAMEPLAY;
     }
 
     return 0;

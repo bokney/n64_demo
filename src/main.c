@@ -7,6 +7,8 @@
 #include "states/splash_screen.h"
 #include "states/title_screen.h"
 #include "states/main_menu.h"
+#include "states/gameplay.h"
+#include "states/game_over.h"
 #include "ecs.h"
 #include "systems/render.h"
 #include "systems/input.h"
@@ -24,6 +26,12 @@ void load_state(state *target, uint32_t state_id) {
             break;
         case STATE_MAIN_MENU:
             assign_state(target, main_menu_init, main_menu_update, main_menu_exit);
+            break;
+        case STATE_GAMEPLAY:
+            assign_state(target, gameplay_init, gameplay_update, gameplay_exit);
+            break;
+        case STATE_GAME_OVER:
+            assign_state(target, game_over_init, game_over_update, game_over_exit);
             break;
         default:
             break;
