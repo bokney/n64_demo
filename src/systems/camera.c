@@ -47,6 +47,13 @@ void camera_system_tick(T3DViewport *viewport) {
                 cam->up.v[0] = 0; cam->up.v[1] = 1; cam->up.v[2] = 0;
                 break;
             }
+            case CAMERA_BEHAVIOR_SCROLL: {
+                cb->scroll.current_offset_x += cb->scroll.scroll_speed_x * (1.0f / 60.0f);
+                cb->scroll.current_offset_z += cb->scroll.scroll_speed_z * (1.0f / 60.0f);
+                pos->x = -cb->scroll.current_offset_x;
+                pos->z = -cb->scroll.current_offset_z;
+                break;
+            }
             case CAMERA_BEHAVIOR_STATIC:
                 break;
             default:

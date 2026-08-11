@@ -28,6 +28,7 @@ typedef enum {
     CAMERA_BEHAVIOR_ORBIT,
     CAMERA_BEHAVIOR_FOLLOW,
     CAMERA_BEHAVIOR_STATIC,
+    CAMERA_BEHAVIOR_SCROLL
 } CameraBehaviorType;
 
 typedef struct {
@@ -36,6 +37,7 @@ typedef struct {
         struct { entity_t target; float distance; float yaw; float pitch; float min_pitch, max_pitch; } orbit;
         struct { entity_t target; fm_vec3_t offset; float lerp_speed; } follow;
         struct { } static_cam;
+        struct { float scroll_speed_x, scroll_speed_z; float current_offset_x, current_offset_z; } scroll;
     };
 } CameraBehavior;
 
