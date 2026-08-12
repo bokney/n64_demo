@@ -16,6 +16,8 @@
 #define LOGIC_RATE_HZ 60
 #define TICKS_PER_UPDATE (TICKS_PER_SECOND / LOGIC_RATE_HZ)
 
+#define INITIAL_STATE STATE_SPLASH
+
 void load_state(state *target, uint32_t state_id) {
     switch (state_id) {
         case STATE_SPLASH:
@@ -49,8 +51,8 @@ int main(void) {
     timer_init();
 
     state current_state;
-    uint32_t current_state_id = STATE_SPLASH;
-    load_state(&current_state, STATE_SPLASH);
+    uint32_t current_state_id = INITIAL_STATE;
+    load_state(&current_state, INITIAL_STATE);
 
     uint64_t current_time = timer_ticks();
     uint64_t accumulator = 0;
