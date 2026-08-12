@@ -206,23 +206,23 @@ InputMover *ecs_get_input_mover(entity_t e) {
     return &input_movers[e];
 }
 
-void ecs_tick_logic(void) {
+void ecs_tick_logic(input_action_held_t input_action_held) {
     for (int i = 0; i < MAX_ENTITIES; i++) {
         if (!entity_alive[i] || !has_position[i] || !has_input_mover[i]) {
             continue;
         }
         InputMover *mover = &input_movers[i];
         Position *p = &positions[i];
-        if (input_action_held(mover->move_up)) {
+        if (input_action_held(ACTION_UP)) {
             p->y -= mover->speed;
         }
-        if (input_action_held(mover->move_down)) {
+        if (input_action_held(ACTION_DOWN)) {
             p->y += mover->speed;
         }
-        if (input_action_held(mover->move_left)) {
+        if (input_action_held(ACTION_LEFT)) {
             p->x -= mover->speed;
         }
-        if (input_action_held(mover->move_right)) {
+        if (input_action_held(ACTION_RIGHT)) {
             p->x += mover->speed;
         }
     }

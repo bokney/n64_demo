@@ -3,9 +3,11 @@
 
 #include "ecs_components.h"
 
+typedef bool (*input_action_held_t)(InputAction action);
+
 entity_t ecs_create_entity(void);
 void ecs_destroy_entity(entity_t e);
 
-void ecs_tick_logic(void);
+void ecs_tick_logic(input_action_held_t input_action_held);
 
 #endif
