@@ -3,11 +3,14 @@
 #include "../systems/camera.h"
 #include "../gameplay/components.h"
 #include "../states/main_menu.h"
+#include "../states/splash_screen.h"
 
 #define FB_COUNT 3
 
 static T3DViewport viewport;
 static bool viewport_initialized = false;
+
+extern sprite_t *logo;
 
 void render_tick(surface_t *disp, uint32_t state_id) {
     (void)disp;
@@ -21,6 +24,12 @@ void render_tick(surface_t *disp, uint32_t state_id) {
         camera_system_tick(&viewport);
         main_menu_render_3d(&viewport);
         return;
+    }
+
+    if (state_id == STATE_SPLASH) {
+        if (logo) {
+            rdpq_sprite_blit(logo, 0, 0, NULL);
+        }
     }
 
     if (state_id == STATE_GAMEPLAY) {

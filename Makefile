@@ -17,6 +17,9 @@ T3DM_FILES := $(patsubst assets/models/%.glb,filesystem/models/%.t3dm,$(GLB_FILE
 XM_FILES := $(wildcard assets/audio/*.xm)
 XM64_FILES := $(patsubst assets/audio/%.xm,filesystem/audio/%.xm64,$(XM_FILES))
 
+PNG_FILES := $(wildcard assets/sprites/*.png)
+SPRITE_FILES := $(patsubst assets/sprites/%.png,filesystem/sprites/%.sprite,$(PNG_FILES))
+
 all: hello.z64
 .PHONY: all
 
@@ -28,7 +31,11 @@ filesystem/audio/%.xm64: assets/audio/%.xm
 	@mkdir -p $(dir $@)
 	audioconv64 -o $(dir $@) $<
 
-$(BUILD_DIR)/filesystem.dfs: $(T3DM_FILES) $(XM64_FILES) $(wildcard filesystem/**/*) | $(BUILD_DIR)
+filesystem/sprites/%.sprite: assets/sprites/%.png
+	@mkdir -p $(dir $@)
+	mksprite --format RGBA16 -o $(dir $@) $<
+
+$(BUILD_DIR)/filesystem.dfs: $(T3DM_FILES) $(XM64_FILES) $(SPRITE_FILES) $(wildcard filesystem/**/*) | $(BUILD_DIR)
 	find filesystem/ -name ".DS_Store" -delete
 	mkdfs $@ filesystem/
 
@@ -43,7 +50,7 @@ $(BUILD_DIRS):
 	mkdir -p $@
 
 clean:
-	rm -rf $(BUILD_DIR) *.z64 filesystem/models filesystem/audio
+	rm -rf $(BUILD_DIR) *.z64 filesystem/models filesystem/audio filesystem/sprites
 .PHONY: clean
 
 -include $(OBJS:.o=.d)
