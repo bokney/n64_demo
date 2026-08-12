@@ -71,7 +71,7 @@ int main(void) {
         while (accumulator >= TICKS_PER_UPDATE) {
             joypad_poll();
             input_update();
-            ecs_tick_logic();
+            ecs_tick_logic(input_action_held);
 
             uint32_t next_state = state_update(&current_state);
 
