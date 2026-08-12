@@ -1,9 +1,8 @@
 #include "render.h"
 #include "../ecs.h"
 #include "../systems/camera.h"
-#include <t3d/t3d.h>
+#include "../gameplay/components.h"
 #include "../states/main_menu.h"
-#include "../states/gameplay.h"
 
 #define FB_COUNT 3
 
@@ -25,10 +24,10 @@ void render_tick(surface_t *disp, uint32_t state_id) {
     }
 
     if (state_id == STATE_GAMEPLAY) {
-        camera_system_tick(&viewport);
-        gameplay_render_3d(&viewport);
+        // 2D only - clear to black
+        rdpq_set_mode_standard();
+        rdpq_clear(RGBA32(0x00, 0x00, 0x00, 0xff));
 
-        // 2D foreground pass - use already-attached disp from main.c
         for (int i = 0; i < MAX_ENTITIES; i++) {
             if (!entity_alive[i]) continue;
 
@@ -63,12 +62,21 @@ void render_tick(surface_t *disp, uint32_t state_id) {
     for (int i = 0; i < MAX_ENTITIES; i++) {
         if (!entity_alive[i]) continue;
 
+        // Skip gameplay-owned entities in non-gameplay states
+        if (has_team[i] && (teams[i].team == TEAM_PLAYER || teams[i].team == TEAM_ENEMY)) continue;
+
         if (has_position[i] && has_sprite[i]) {
             Sprite *s = &sprites[i];
             Position *p = &positions[i];
             rdpq_set_mode_fill(s->color);
             rdpq_fill_rectangle((int)p->x, (int)p->y, (int)(p->x + s->w), (int)(p->y + s->h));
         }
+    }
+
+    // Render triangles after sprites with explicit state
+    for (int i = 0; i < MAX_ENTITIES; i++) {
+        if (!entity_alive[i]) continue;
+        if (has_team[i] && (teams[i].team == TEAM_PLAYER || teams[i].team == TEAM_ENEMY)) continue;
 
         if (has_position[i] && has_text[i]) {
             Text *txt = &texts[i];
