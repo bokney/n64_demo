@@ -37,7 +37,10 @@ void ecs_destroy_entity(entity_t e) {
     has_sprite[e] = false;
     has_text[e] = false;
     has_triangle[e] = false;
-    has_input_mover[e] = false;
+    has_mesh[e] = false;
+            has_input_mover[e] = false;
+    has_lighting[e] = false;
+            has_lighting[e] = false;
 }
 
 void ecs_add_position(entity_t e, Position p) {
