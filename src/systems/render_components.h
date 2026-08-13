@@ -3,10 +3,13 @@
 
 #include "../ecs_components.h"
 #include <libdragon.h>
+#include <t3d/t3d.h>
+#include <t3d/t3dmodel.h>
 
 typedef struct { uint16_t w, h; color_t color; } Sprite;
 typedef struct { const char *str; int font_id; color_t color; } Text;
 typedef struct { float v1x, v1y, v2x, v2y, v3x, v3y; color_t color; } Triangle;
+typedef struct { T3DModel *model; } Mesh;
 
 extern Sprite sprites[MAX_ENTITIES];
 extern bool has_sprite[MAX_ENTITIES];
@@ -14,6 +17,8 @@ extern Text texts[MAX_ENTITIES];
 extern bool has_text[MAX_ENTITIES];
 extern Triangle triangles[MAX_ENTITIES];
 extern bool has_triangle[MAX_ENTITIES];
+extern Mesh meshes[MAX_ENTITIES];
+extern bool has_mesh[MAX_ENTITIES];
 
 void ecs_add_sprite(entity_t e, Sprite s);
 void ecs_remove_sprite(entity_t e);
@@ -29,5 +34,10 @@ void ecs_add_triangle(entity_t e, Triangle t);
 void ecs_remove_triangle(entity_t e);
 bool ecs_has_triangle(entity_t e);
 Triangle *ecs_get_triangle(entity_t e);
+
+void ecs_add_mesh(entity_t e, Mesh m);
+void ecs_remove_mesh(entity_t e);
+bool ecs_has_mesh(entity_t e);
+Mesh *ecs_get_mesh(entity_t e);
 
 #endif

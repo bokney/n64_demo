@@ -6,6 +6,8 @@ Text texts[MAX_ENTITIES];
 bool has_text[MAX_ENTITIES];
 Triangle triangles[MAX_ENTITIES];
 bool has_triangle[MAX_ENTITIES];
+Mesh meshes[MAX_ENTITIES];
+bool has_mesh[MAX_ENTITIES];
 
 void ecs_add_sprite(entity_t e, Sprite s) {
     sprites[e] = s;
@@ -56,4 +58,21 @@ bool ecs_has_triangle(entity_t e) {
 
 Triangle *ecs_get_triangle(entity_t e) {
     return &triangles[e];
+}
+
+void ecs_add_mesh(entity_t e, Mesh m) {
+    meshes[e] = m;
+    has_mesh[e] = true;
+}
+
+void ecs_remove_mesh(entity_t e) {
+    has_mesh[e] = false;
+}
+
+bool ecs_has_mesh(entity_t e) {
+    return has_mesh[e];
+}
+
+Mesh *ecs_get_mesh(entity_t e) {
+    return &meshes[e];
 }

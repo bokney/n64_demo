@@ -4,6 +4,7 @@
 #include "ecs_components.h"
 #include "systems/camera_components.h"
 #include "systems/render_components.h"
+#include "systems/lighting_components.h"
 #include "systems/input_components.h"
 
 typedef bool (*input_action_held_t)(InputAction action);

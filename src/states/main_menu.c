@@ -5,29 +5,17 @@
 #include <t3d/t3d.h>
 #include <t3d/t3dmodel.h>
 
-#define FB_COUNT 3
-
 #define MODEL_SCALE 0.1f
 #define MODEL_ROT_SPEED  0.03f
 #define CAM_FOV_SPEED    1.0f
 #define CAM_FOV_MIN      20.0f
 #define CAM_FOV_MAX      90.0f
 
-static T3DModel *cube_model = NULL;
-static T3DMat4FP *model_mats = NULL;
-static int frame_idx = 0;
-
-static const uint8_t color_ambient[4] = {80, 80, 100, 0xFF};
-static const uint8_t color_dir[4]     = {0xEE, 0xAA, 0xAA, 0xFF};
-
-static float model_yaw = 0.0f;
-static float model_pitch = 0.0f;
-static float model_roll = 0.0f;
 static entity_t cam_entity = MAX_ENTITIES;
+static entity_t cube_entity = MAX_ENTITIES;
+static entity_t lighting_entity = MAX_ENTITIES;
 
 void main_menu_init(void) {
-    cube_model = t3d_model_load("rom:/models/colourful_cube.t3dm");
-
     cam_entity = ecs_create_entity();
     ecs_add_position(cam_entity, (Position){0.0f, 12.0f, 25.0f});
     ecs_add_camera(cam_entity, (Camera){
@@ -40,40 +28,49 @@ void main_menu_init(void) {
         .is_active = true
     });
 
-    model_mats = malloc_uncached(sizeof(T3DMat4FP) * FB_COUNT);
-    frame_idx = 0;
+    cube_entity = ecs_create_entity();
+    ecs_add_position(cube_entity, (Position){0.0f, 0.0f, 0.0f});
+    ecs_add_rotation(cube_entity, (Rotation){0.0f, 0.0f, 0.0f});
+    ecs_add_scale(cube_entity, (Scale){MODEL_SCALE, MODEL_SCALE, MODEL_SCALE});
+    ecs_add_mesh(cube_entity, (Mesh){.model = t3d_model_load("rom:/models/colourful_cube.t3dm")});
+
+    lighting_entity = ecs_create_entity();
+    fm_vec3_t ldir = {{-1.0f, 1.0f, 1.0f}};
+    fm_vec3_norm(&ldir, &ldir);
+    ecs_add_lighting(lighting_entity, (Lighting){
+        .ambient = {80, 80, 100, 0xFF},
+        .direction_color = {0xEE, 0xAA, 0xAA, 0xFF},
+        .direction = ldir,
+        .is_active = true
+    });
 }
 
 uint8_t main_menu_update(void) {
     Camera *cam = ecs_get_camera(cam_entity);
-    if (!cam) return 0;
+    Rotation *rot = ecs_get_rotation(cube_entity);
 
-    // Model rotation via C-buttons
-    if (input_action_held(ACTION_C_LEFT))  model_yaw   += MODEL_ROT_SPEED;
-    if (input_action_held(ACTION_C_RIGHT)) model_yaw   -= MODEL_ROT_SPEED;
-    if (input_action_held(ACTION_C_UP))    model_pitch += MODEL_ROT_SPEED;
-    if (input_action_held(ACTION_C_DOWN))  model_pitch -= MODEL_ROT_SPEED;
+    if (cam && rot) {
+        if (input_action_held(ACTION_C_LEFT))  rot->yaw   += MODEL_ROT_SPEED;
+        if (input_action_held(ACTION_C_RIGHT)) rot->yaw   -= MODEL_ROT_SPEED;
+        if (input_action_held(ACTION_C_UP))    rot->pitch += MODEL_ROT_SPEED;
+        if (input_action_held(ACTION_C_DOWN))  rot->pitch -= MODEL_ROT_SPEED;
+        if (input_action_held(ACTION_L)) rot->roll -= MODEL_ROT_SPEED;
+        if (input_action_held(ACTION_R)) rot->roll += MODEL_ROT_SPEED;
 
-    // Model roll via shoulder buttons
-    if (input_action_held(ACTION_L)) model_roll -= MODEL_ROT_SPEED;
-    if (input_action_held(ACTION_R)) model_roll += MODEL_ROT_SPEED;
+        if (input_action_held(ACTION_UP)) {
+            cam->fov -= CAM_FOV_SPEED * T3D_DEG_TO_RAD(1.0f);
+            if (cam->fov < T3D_DEG_TO_RAD(CAM_FOV_MIN)) cam->fov = T3D_DEG_TO_RAD(CAM_FOV_MIN);
+        }
+        if (input_action_held(ACTION_DOWN)) {
+            cam->fov += CAM_FOV_SPEED * T3D_DEG_TO_RAD(1.0f);
+            if (cam->fov > T3D_DEG_TO_RAD(CAM_FOV_MAX)) cam->fov = T3D_DEG_TO_RAD(CAM_FOV_MAX);
+        }
 
-    // Camera FOV zoom via control stick up/down (Lakitu style)
-    if (input_action_held(ACTION_UP)) {
-        cam->fov -= CAM_FOV_SPEED * T3D_DEG_TO_RAD(1.0f);
-        if (cam->fov < T3D_DEG_TO_RAD(CAM_FOV_MIN)) cam->fov = T3D_DEG_TO_RAD(CAM_FOV_MIN);
-    }
-    if (input_action_held(ACTION_DOWN)) {
-        cam->fov += CAM_FOV_SPEED * T3D_DEG_TO_RAD(1.0f);
-        if (cam->fov > T3D_DEG_TO_RAD(CAM_FOV_MAX)) cam->fov = T3D_DEG_TO_RAD(CAM_FOV_MAX);
-    }
-
-    // Reset model rotation
-    if (input_action_pressed(ACTION_CONFIRM)) {
-        model_yaw = model_pitch = model_roll = 0.0f;
+        if (input_action_pressed(ACTION_CONFIRM)) {
+            rot->pitch = rot->yaw = rot->roll = 0.0f;
+        }
     }
 
-    // Start gameplay
     if (input_action_pressed(ACTION_PAUSE)) {
         return STATE_GAMEPLAY;
     }
@@ -81,42 +78,18 @@ uint8_t main_menu_update(void) {
     return 0;
 }
 
-void main_menu_render(T3DViewport *viewport) {
-    if (cube_model == NULL) return;
-
-    frame_idx = (frame_idx + 1) % FB_COUNT;
-
-    t3d_mat4fp_from_srt_euler(&model_mats[frame_idx],
-        (float[3]){MODEL_SCALE, MODEL_SCALE, MODEL_SCALE},
-        (float[3]){model_pitch, model_yaw, model_roll},
-        (float[3]){0.0f, 0.0f, 0.0f}
-    );
-
-    t3d_frame_start();
-    t3d_viewport_attach(viewport);
-
-    t3d_screen_clear_color(RGBA32(0x3f, 0x3f, 0x74, 0xff));
-    t3d_screen_clear_depth();
-
-    t3d_light_set_ambient(color_ambient);
-    fm_vec3_t ldir = {{-1.0f, 1.0f, 1.0f}};
-    fm_vec3_norm(&ldir, &ldir);
-    t3d_light_set_directional(0, color_dir, &ldir);
-    t3d_light_set_count(1);
-
-    t3d_matrix_push(&model_mats[frame_idx]);
-    t3d_model_draw(cube_model);
-    t3d_matrix_pop(1);
-}
-
 uint8_t main_menu_exit(void) {
-    if (cube_model) {
-        t3d_model_free(cube_model);
-        cube_model = NULL;
+    if (cube_entity != MAX_ENTITIES) {
+        Mesh *mesh = ecs_get_mesh(cube_entity);
+        if (mesh && mesh->model) {
+            t3d_model_free(mesh->model);
+        }
+        ecs_destroy_entity(cube_entity);
+        cube_entity = MAX_ENTITIES;
     }
-    if (model_mats) {
-        free_uncached(model_mats);
-        model_mats = NULL;
+    if (lighting_entity != MAX_ENTITIES) {
+        ecs_destroy_entity(lighting_entity);
+        lighting_entity = MAX_ENTITIES;
     }
     if (cam_entity != MAX_ENTITIES) {
         ecs_destroy_entity(cam_entity);
