@@ -60,7 +60,7 @@ entity_t spawn_enemy(const SpawnEntry *entry) {
     gameplay_add_velocity(e, vel);
     gameplay_add_enemy(e, enemy);
 
-    ecs_add_sprite(e, (Sprite){ 32, 32, RGBA32(0xff, 0x44, 0x44, 0xff) });
+    ecs_add_sprite(e, (Sprite){ .sprite = NULL, .visible = true });
 
     return e;
 }
