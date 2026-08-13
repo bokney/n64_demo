@@ -10,7 +10,6 @@ typedef struct _state {
     uint32_t step;
     void (*init)(void);
     uint8_t (*update)(void);
-    void (*render)(T3DViewport *viewport);
     uint8_t (*exit)(void);
 } state;
 
@@ -18,12 +17,9 @@ void assign_state(
     state *target,
     void (*init)(void),
     uint8_t (*update)(void),
-    void (*render)(T3DViewport *viewport),
     uint8_t (*exit)(void)
 );
 
 uint8_t state_update(state *target);
-
-void state_draw(state *target, T3DViewport *viewport);
 
 #endif
