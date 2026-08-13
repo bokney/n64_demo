@@ -46,7 +46,7 @@ void load_state(
 }
 
 int main(void) {
-    display_init(RESOLUTION_320x240, DEPTH_16_BPP, 3, GAMMA_NONE, FILTERS_RESAMPLE);
+    display_init(RESOLUTION_320x240, DEPTH_16_BPP, 3, GAMMA_NONE, FILTERS_DISABLED);
     rdpq_init();
     t3d_init((T3DInitParams){});
     dfs_init(DFS_DEFAULT_LOCATION);
