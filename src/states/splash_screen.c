@@ -1,13 +1,12 @@
 #include "splash_screen.h"
-#include "../ecs.h"
 #include "../game.h"
 #include "../systems/input.h"
-#include "sprite.h"
 
-sprite_t *logo = NULL;
+static xm64player_t music;
 
 void splash_screen_init(void) {
-    logo = sprite_load("rom:/sprites/libdragon_logo.sprite");
+    xm64player_open(&music, "rom:/audio/boomtiss.xm64");
+    xm64player_play(&music, 0);
 }
 
 uint8_t splash_screen_update(void) {
@@ -18,7 +17,7 @@ uint8_t splash_screen_update(void) {
 }
 
 uint8_t splash_screen_exit(void) {
-    sprite_free(logo);
-    logo = NULL;
+    xm64player_stop(&music);
+    xm64player_close(&music);
     return 0;
 }

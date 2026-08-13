@@ -2,6 +2,7 @@
 #define SPLASH_SCREEN_H
 
 #include <stdint.h>
+#include <t3d/t3d.h>
 
 void splash_screen_init(void);
 uint8_t splash_screen_update(void);
