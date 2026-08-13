@@ -13,7 +13,3 @@ uint8_t game_over_exit(void) {
 
     return 0;
 }
-
-void game_over_render_3d(T3DViewport *viewport) {
-    
-}
