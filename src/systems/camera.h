@@ -3,6 +3,7 @@
 
 #include <t3d/t3d.h>
 
-void camera_system_tick(T3DViewport *viewport);
+void camera_system_update(void);
+void camera_system_apply(T3DViewport *viewport);
 
 #endif

@@ -2,7 +2,7 @@
 #include "../ecs.h"
 #include <t3d/t3d.h>
 
-void camera_system_tick(T3DViewport *viewport) {
+void camera_system_update(void) {
     for (entity_t e = 0; e < MAX_ENTITIES; e++) {
         if (!entity_alive[e] || !has_camera_behavior[e] || !has_camera[e]) continue;
 
@@ -60,7 +60,9 @@ void camera_system_tick(T3DViewport *viewport) {
                 break;
         }
     }
+}
 
+void camera_system_apply(T3DViewport *viewport) {
     entity_t active = MAX_ENTITIES;
     for (entity_t e = 0; e < MAX_ENTITIES; e++) {
         if (entity_alive[e] && has_camera[e] && cameras[e].is_active) {
