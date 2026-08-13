@@ -1,0 +1,59 @@
+#include "render_components.h"
+
+Sprite sprites[MAX_ENTITIES];
+bool has_sprite[MAX_ENTITIES];
+Text texts[MAX_ENTITIES];
+bool has_text[MAX_ENTITIES];
+Triangle triangles[MAX_ENTITIES];
+bool has_triangle[MAX_ENTITIES];
+
+void ecs_add_sprite(entity_t e, Sprite s) {
+    sprites[e] = s;
+    has_sprite[e] = true;
+}
+
+void ecs_remove_sprite(entity_t e) {
+    has_sprite[e] = false;
+}
+
+bool ecs_has_sprite(entity_t e) {
+    return has_sprite[e];
+}
+
+Sprite *ecs_get_sprite(entity_t e) {
+    return &sprites[e];
+}
+
+void ecs_add_text(entity_t e, Text t) {
+    texts[e] = t;
+    has_text[e] = true;
+}
+
+void ecs_remove_text(entity_t e) {
+    has_text[e] = false;
+}
+
+bool ecs_has_text(entity_t e) {
+    return has_text[e];
+}
+
+Text *ecs_get_text(entity_t e) {
+    return &texts[e];
+}
+
+void ecs_add_triangle(entity_t e, Triangle t) {
+    triangles[e] = t;
+    has_triangle[e] = true;
+}
+
+void ecs_remove_triangle(entity_t e) {
+    has_triangle[e] = false;
+}
+
+bool ecs_has_triangle(entity_t e) {
+    return has_triangle[e];
+}
+
+Triangle *ecs_get_triangle(entity_t e) {
+    return &triangles[e];
+}

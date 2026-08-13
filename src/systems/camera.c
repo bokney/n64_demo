@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "camera_components.h"
 #include "../ecs.h"
 #include <t3d/t3d.h>
 
