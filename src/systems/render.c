@@ -71,9 +71,10 @@ void render_tick(surface_t *disp, state *current) {
     }
 
     t3d_frame_start();
+    rdpq_mode_dithering(DITHER_NONE_NONE);
     camera_system_apply(&viewport);
 
-    t3d_screen_clear_color(RGBA32(0x3f, 0x3f, 0x74, 0xff));
+    t3d_screen_clear_color(RGBA32(0x00, 0x00, 0x00, 0x00));
     t3d_screen_clear_depth();
 
     lighting_system_apply();
