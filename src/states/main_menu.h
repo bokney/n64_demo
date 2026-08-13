@@ -6,7 +6,7 @@
 
 void main_menu_init(void);
 uint8_t main_menu_update(void);
+void main_menu_render(T3DViewport *viewport);
 uint8_t main_menu_exit(void);
-void main_menu_render_3d(T3DViewport *viewport);
 
 #endif

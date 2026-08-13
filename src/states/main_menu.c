@@ -81,7 +81,7 @@ uint8_t main_menu_update(void) {
     return 0;
 }
 
-void main_menu_render_3d(T3DViewport *viewport) {
+void main_menu_render(T3DViewport *viewport) {
     if (cube_model == NULL) return;
 
     frame_idx = (frame_idx + 1) % FB_COUNT;
