@@ -44,6 +44,23 @@ void render_system_draw(T3DViewport *viewport) {
     }
 }
 
+void render_system_draw_2d(void) {
+    rdpq_set_mode_standard();
+
+    for (entity_t e = 0; e < MAX_ENTITIES; e++) {
+        if (!entity_alive[e] || !has_sprite[e]) continue;
+        Sprite *s = &sprites[e];
+        if (!s->visible || !s->sprite) continue;
+
+        rdpq_blitparms_t parms = {0};
+        parms.cx = s->sprite->width  / 2.0f;
+        parms.cy = s->sprite->height / 2.0f;
+        parms.scale_x = parms.scale_y = (s->scale > 0.0f) ? s->scale : 1.0f;
+        parms.theta = s->rotation;
+        rdpq_sprite_blit(s->sprite, s->x, s->y, &parms);
+    }
+}
+
 void render_tick(surface_t *disp, state *current) {
     (void)disp;
     (void)current;
@@ -61,4 +78,6 @@ void render_tick(surface_t *disp, state *current) {
 
     lighting_system_apply();
     render_system_draw(&viewport);
+
+    render_system_draw_2d();
 }
