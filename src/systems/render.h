@@ -2,8 +2,8 @@
 #define RENDER_H
 
 #include <libdragon.h>
-#include "../game.h"
+#include "../state.h"
 
-void render_tick(surface_t *disp, uint32_t state_id);
+void render_tick(surface_t *disp, state *current);
 
 #endif

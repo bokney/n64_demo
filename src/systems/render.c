@@ -1,18 +1,14 @@
 #include "render.h"
-#include "../ecs.h"
-#include "../systems/camera.h"
-#include "../gameplay/components.h"
-#include "../states/main_menu.h"
-#include "../states/splash_screen.h"
+#include "../state.h"
+#include "camera.h"
+#include "t3d/t3d.h"
 
 #define FB_COUNT 3
 
 static T3DViewport viewport;
 static bool viewport_initialized = false;
 
-extern sprite_t *logo;
-
-void render_tick(surface_t *disp, uint32_t state_id) {
+void render_tick(surface_t *disp, state *current) {
     (void)disp;
 
     if (!viewport_initialized) {
@@ -20,89 +16,5 @@ void render_tick(surface_t *disp, uint32_t state_id) {
         viewport_initialized = true;
     }
 
-    if (state_id == STATE_MAIN_MENU) {
-        camera_system_tick(&viewport);
-        main_menu_render_3d(&viewport);
-        return;
-    }
-
-    if (state_id == STATE_SPLASH) {
-        if (logo) {
-            rdpq_sprite_blit(logo, 0, 0, NULL);
-        }
-    }
-
-    if (state_id == STATE_GAMEPLAY) {
-        // 2D only - clear to black
-        rdpq_set_mode_standard();
-        rdpq_clear(RGBA32(0x00, 0x00, 0x00, 0xff));
-
-        for (int i = 0; i < MAX_ENTITIES; i++) {
-            if (!entity_alive[i]) continue;
-
-            if (has_position[i] && has_sprite[i]) {
-                Sprite *s = &sprites[i];
-                Position *p = &positions[i];
-                rdpq_set_mode_fill(s->color);
-                rdpq_fill_rectangle((int)p->x, (int)p->y, (int)(p->x + s->w), (int)(p->y + s->h));
-            }
-
-            if (has_position[i] && has_text[i]) {
-                Text *txt = &texts[i];
-                Position *p = &positions[i];
-                rdpq_set_mode_standard();
-                rdpq_text_printf(NULL, txt->font_id, (int)p->x, (int)p->y, "%s", txt->str);
-            }
-
-            if (has_triangle[i]) {
-                Triangle *tri = &triangles[i];
-                rdpq_set_mode_standard();
-                rdpq_mode_combiner(RDPQ_COMBINER_FLAT);
-                rdpq_set_prim_color(tri->color);
-                float v1[] = {tri->v1x, tri->v1y};
-                float v2[] = {tri->v2x, tri->v2y};
-                float v3[] = {tri->v3x, tri->v3y};
-                rdpq_triangle(&TRIFMT_FILL, v1, v2, v3);
-            }
-        }
-        return;
-    }
-
-    for (int i = 0; i < MAX_ENTITIES; i++) {
-        if (!entity_alive[i]) continue;
-
-        // Skip gameplay-owned entities in non-gameplay states
-        if (has_team[i] && (teams[i].team == TEAM_PLAYER || teams[i].team == TEAM_ENEMY)) continue;
-
-        if (has_position[i] && has_sprite[i]) {
-            Sprite *s = &sprites[i];
-            Position *p = &positions[i];
-            rdpq_set_mode_fill(s->color);
-            rdpq_fill_rectangle((int)p->x, (int)p->y, (int)(p->x + s->w), (int)(p->y + s->h));
-        }
-    }
-
-    // Render triangles after sprites with explicit state
-    for (int i = 0; i < MAX_ENTITIES; i++) {
-        if (!entity_alive[i]) continue;
-        if (has_team[i] && (teams[i].team == TEAM_PLAYER || teams[i].team == TEAM_ENEMY)) continue;
-
-        if (has_position[i] && has_text[i]) {
-            Text *txt = &texts[i];
-            Position *p = &positions[i];
-            rdpq_set_mode_standard();
-            rdpq_text_printf(NULL, txt->font_id, (int)p->x, (int)p->y, "%s", txt->str);
-        }
-
-        if (has_triangle[i]) {
-            Triangle *tri = &triangles[i];
-            rdpq_set_mode_standard();
-            rdpq_mode_combiner(RDPQ_COMBINER_FLAT);
-            rdpq_set_prim_color(tri->color);
-            float v1[] = {tri->v1x, tri->v1y};
-            float v2[] = {tri->v2x, tri->v2y};
-            float v3[] = {tri->v3x, tri->v3y};
-            rdpq_triangle(&TRIFMT_FILL, v1, v2, v3);
-        }
-    }
+    camera_system_apply(&viewport);
 }
