@@ -25,18 +25,11 @@
 #define AMP_V3_X 25.0f
 #define AMP_V3_Y 35.0f
 
-static entity_t bg_entity;
 static entity_t tri_entity;
 static float elapsed;
 
 void title_screen_init(void) {
     elapsed = 0.0f;
-
-    bg_entity = ecs_create_entity();
-    Position bg_p = {0.0f, 0.0f, 0.0f};
-    Sprite bg_s = {320, 240, RGBA32(0x3f, 0x3f, 0x74, 0xff)};
-    ecs_add_position(bg_entity, bg_p);
-    ecs_add_sprite(bg_entity, bg_s);
 
     tri_entity = ecs_create_entity();
     Triangle tri = {
@@ -83,7 +76,6 @@ uint8_t title_screen_update(void) {
 }
 
 uint8_t title_screen_exit(void) {
-    ecs_destroy_entity(bg_entity);
     ecs_destroy_entity(tri_entity);
     return 0;
 }

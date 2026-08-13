@@ -6,7 +6,13 @@
 #include <t3d/t3d.h>
 #include <t3d/t3dmodel.h>
 
-typedef struct { uint16_t w, h; color_t color; } Sprite;
+typedef struct {
+    sprite_t *sprite;       // libdragon sprite asset (loaded via sprite_load)
+    float x, y;             // center screen position
+    float scale;            // uniform scale factor (1.0 = native size)
+    float rotation;         // rotation in radians (0.0 = no rotation)
+    bool visible;
+} Sprite;
 typedef struct { const char *str; int font_id; color_t color; } Text;
 typedef struct { float v1x, v1y, v2x, v2y, v3x, v3y; color_t color; } Triangle;
 typedef struct { T3DModel *model; } Mesh;
