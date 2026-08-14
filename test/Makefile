@@ -1,5 +1,5 @@
 CC ?= cc
-CFLAGS := -std=c99 -Wall -Wextra -Wpedantic -I../src -Imocks -I../unity/src
+CFLAGS := -std=gnu17 -Wall -Wextra -I../src -Imocks -I../unity/src
 
 STATE_SRC := ../src/state.c
 ECS_SRC := ../src/ecs.c \
@@ -10,18 +10,20 @@ ECS_SRC := ../src/ecs.c \
 UNITY_SRC := ../unity/src/unity.c
 
 test_state: test_state.c $(STATE_SRC) $(UNITY_SRC)
-	$(CC) $(CFLAGS) -o test_state $^
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o bin/test_state $^
 
 test_ecs: test_ecs.c $(ECS_SRC) $(UNITY_SRC)
-	$(CC) $(CFLAGS) -o test_ecs $^
+	mkdir -p bin
+	$(CC) $(CFLAGS) -o bin/test_ecs $^
 
 test: test_state test_ecs
 	@echo "=== State machine tests ==="
-	./test_state
+	./bin/test_state
 	@echo "=== ECS tests ==="
-	./test_ecs
+	./bin/test_ecs
 
 clean:
-	rm -f test_state test_ecs
+	rm -rf bin
 
 .PHONY: test clean
