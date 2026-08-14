@@ -33,6 +33,7 @@ uint8_t state_update(state *target) {
             if (target->exit) target->exit();
 
             target->phase = 0;
+            target->step = 0;
 
             return next_state;
         }
