@@ -5,7 +5,7 @@ BUILD_DIR=build
 include $(N64_INST)/include/n64.mk
 include tiny3d/t3d.mk
 
-SRC_DIRS := src src/states src/systems src/gameplay
+SRC_DIRS := src src/states src/systems
 
 C_FILES := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 OBJS := $(C_FILES:%.c=$(BUILD_DIR)/%.o)
