@@ -20,7 +20,9 @@ entity_t ecs_create_entity(void) {
             has_sprite[i] = false;
             has_text[i] = false;
             has_triangle[i] = false;
+            has_mesh[i] = false;
             has_input_mover[i] = false;
+            has_lighting[i] = false;
             return i;
         }
     }
@@ -38,9 +40,8 @@ void ecs_destroy_entity(entity_t e) {
     has_text[e] = false;
     has_triangle[e] = false;
     has_mesh[e] = false;
-            has_input_mover[e] = false;
+    has_input_mover[e] = false;
     has_lighting[e] = false;
-            has_lighting[e] = false;
 }
 
 void ecs_add_position(entity_t e, Position p) {
