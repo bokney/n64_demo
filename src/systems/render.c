@@ -48,16 +48,29 @@ void render_system_draw_2d(void) {
     rdpq_set_mode_standard();
 
     for (entity_t e = 0; e < MAX_ENTITIES; e++) {
-        if (!entity_alive[e] || !has_sprite[e]) continue;
-        Sprite *s = &sprites[e];
-        if (!s->visible || !s->sprite) continue;
+        if (!entity_alive[e]) continue;
 
-        rdpq_blitparms_t parms = {0};
-        parms.cx = s->sprite->width  / 2.0f;
-        parms.cy = s->sprite->height / 2.0f;
-        parms.scale_x = parms.scale_y = (s->scale > 0.0f) ? s->scale : 1.0f;
-        parms.theta = s->rotation;
-        rdpq_sprite_blit(s->sprite, s->x, s->y, &parms);
+        if (has_sprite[e]) {
+            Sprite *s = &sprites[e];
+            if (s->visible && s->sprite) {
+                rdpq_set_mode_standard();
+                rdpq_blitparms_t parms = {0};
+                parms.cx = s->sprite->width  / 2.0f;
+                parms.cy = s->sprite->height / 2.0f;
+                parms.scale_x = parms.scale_y = (s->scale > 0.0f) ? s->scale : 1.0f;
+                parms.theta = s->rotation;
+                rdpq_sprite_blit(s->sprite, s->x, s->y, &parms);
+            }
+        }
+
+        if (has_triangle[e]) {
+            Triangle *t = &triangles[e];
+            float v1[2] = {t->v1x, t->v1y};
+            float v2[2] = {t->v2x, t->v2y};
+            float v3[2] = {t->v3x, t->v3y};
+            rdpq_set_mode_fill(t->color);
+            rdpq_triangle(&TRIFMT_FILL, v1, v2, v3);
+        }
     }
 }
 

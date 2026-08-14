@@ -20,8 +20,8 @@ entity_t ecs_create_entity(void) {
             has_sprite[i] = false;
             has_text[i] = false;
             has_triangle[i] = false;
-            has_input_mover[i] = false;
             has_mesh[i] = false;
+            has_input_mover[i] = false;
             has_lighting[i] = false;
             return i;
         }
