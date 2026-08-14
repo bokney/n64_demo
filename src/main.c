@@ -3,11 +3,7 @@
 
 #include "game.h"
 #include "state.h"
-#include "states/splash_screen.h"
-#include "states/title_screen.h"
-#include "states/main_menu.h"
-#include "states/gameplay.h"
-#include "states/game_over.h"
+#include "states/state_registry.h"
 #include "systems/render.h"
 #include "systems/input.h"
 #include "systems/camera.h"
@@ -15,33 +11,6 @@
 
 #define LOGIC_RATE_HZ 60
 #define TICKS_PER_UPDATE (TICKS_PER_SECOND / LOGIC_RATE_HZ)
-
-#define INITIAL_STATE STATE_SPLASH
-
-void load_state(
-    state *target,
-    uint8_t state_id
-) {
-    switch (state_id) {
-        case STATE_SPLASH:
-            assign_state(target, splash_screen_init, splash_screen_update, splash_screen_exit);
-            break;
-        case STATE_TITLE_SCREEN:
-            assign_state(target, title_screen_init, title_screen_update, title_screen_exit);
-            break;
-        case STATE_MAIN_MENU:
-            assign_state(target, main_menu_init, main_menu_update, main_menu_exit);
-            break;
-        case STATE_GAMEPLAY:
-            assign_state(target, gameplay_init, gameplay_update, gameplay_exit);
-            break;
-        case STATE_GAME_OVER:
-            assign_state(target, game_over_init, game_over_update, game_over_exit);
-            break;
-        default:
-            break;
-    }
-}
 
 int main(void) {
     display_init(RESOLUTION_320x240, DEPTH_16_BPP, 3, GAMMA_NONE, FILTERS_DISABLED);
@@ -55,7 +24,7 @@ int main(void) {
 
     state current_state;
     uint8_t current_state_id = INITIAL_STATE;
-    load_state(&current_state, current_state_id);
+    state_registry_load(&current_state, current_state_id);
 
     uint64_t current_time = timer_ticks();
     uint64_t accumulator = 0;
@@ -80,9 +49,10 @@ int main(void) {
             uint32_t next_state = state_update(&current_state);
 
             if (next_state != STATE_NONE) {
-                load_state(&current_state, next_state);
-                accumulator = 0;
-                break;
+                if (state_registry_load(&current_state, (uint8_t)next_state) != STATE_NONE) {
+                    accumulator = 0;
+                    break;
+                }
             }
 
             accumulator -= TICKS_PER_UPDATE;

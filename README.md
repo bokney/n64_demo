@@ -47,12 +47,13 @@ src/
   state.{c,h}                    — phase-based state machine (init/update/exit)
   ecs.{c,h}                      — entity manager, component storage, logic dispatch
   ecs_components.h               — core entity/component types
-  states/
-    splash_screen.{c,h}          — splash with animated box + music
-    title_screen.{c,h}           — title screen skeleton
-    main_menu.{c,h}              — main menu
-    gameplay.{c,h}               — gameplay loop
-    game_over.{c,h}              — game over screen
+   states/
+     splash_screen.{c,h}          — splash with animated box + music
+     title_screen.{c,h}           — title screen skeleton
+     main_menu.{c,h}              — main menu
+     gameplay.{c,h}               — gameplay loop
+     game_over.{c,h}              — game over screen
+     state_registry.{c,h}         — routes StateID to concrete state functions
   systems/
     input.{c,h}                  — action mapping, deadzone, edge detection
     input_components.{c,h}       — input component storage
