@@ -1,3 +1,4 @@
+#include <libdragon.h>
 #include "title_screen.h"
 #include "../ecs.h"
 #include "../game.h"
@@ -28,6 +29,8 @@
 static entity_t tri_entity;
 static float elapsed;
 
+static xm64player_t music;
+
 void title_screen_init(void) {
     elapsed = 0.0f;
 
@@ -42,6 +45,9 @@ void title_screen_init(void) {
         .color = RGBA32(0x5b, 0x6e, 0xe1, 0xff)
     };
     ecs_add_triangle(tri_entity, tri);
+
+    xm64player_open(&music, "rom:/audio/convertable_drive.xm64");
+    xm64player_play(&music, 0);
 }
 
 uint8_t title_screen_update(void) {
@@ -77,5 +83,8 @@ uint8_t title_screen_update(void) {
 
 uint8_t title_screen_exit(void) {
     ecs_destroy_entity(tri_entity);
+
+    xm64player_stop(&music);
+    xm64player_close(&music);
     return 0;
 }
