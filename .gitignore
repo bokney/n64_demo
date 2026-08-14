@@ -29,5 +29,8 @@ compile_commands.json
 .opendcache/
 .opencode/
 
+# Test binaries
+test/bin/
+
 # Raw asset sources (not tracked; only DFS-ready files in filesystem/ are)
 assets/
