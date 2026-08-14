@@ -41,8 +41,6 @@ void load_state(
         default:
             break;
     }
-    target->phase = 0;
-    target->step = 0;
 }
 
 int main(void) {

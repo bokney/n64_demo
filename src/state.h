@@ -2,8 +2,6 @@
 #define STATE_H
 
 #include <stdint.h>
-#include <libdragon.h>
-#include <t3d/t3d.h>
 
 typedef struct _state {
     uint8_t phase;
