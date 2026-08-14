@@ -21,7 +21,7 @@ Nintendo 64 homebrew game template built with **libdragon**
 | Graphics | RDPQ + tiny3d |
 | Audio | libdragon mixer + XM64 player |
 | Build | Makefile + `n64.mk` |
-| Language | C99 (libdragon) |
+| Language | C17 (gnu17, libdragon) |
 
 ## Building
 
