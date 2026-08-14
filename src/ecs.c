@@ -21,6 +21,8 @@ entity_t ecs_create_entity(void) {
             has_text[i] = false;
             has_triangle[i] = false;
             has_input_mover[i] = false;
+            has_mesh[i] = false;
+            has_lighting[i] = false;
             return i;
         }
     }
@@ -28,6 +30,7 @@ entity_t ecs_create_entity(void) {
 }
 
 void ecs_destroy_entity(entity_t e) {
+    if (e >= MAX_ENTITIES) return;
     entity_alive[e] = false;
     has_position[e] = false;
     has_rotation[e] = false;
@@ -38,59 +41,70 @@ void ecs_destroy_entity(entity_t e) {
     has_text[e] = false;
     has_triangle[e] = false;
     has_mesh[e] = false;
-            has_input_mover[e] = false;
+    has_input_mover[e] = false;
     has_lighting[e] = false;
-            has_lighting[e] = false;
 }
 
 void ecs_add_position(entity_t e, Position p) {
+    if (e >= MAX_ENTITIES) return;
     positions[e] = p;
     has_position[e] = true;
 }
 
 void ecs_remove_position(entity_t e) {
+    if (e >= MAX_ENTITIES) return;
     has_position[e] = false;
 }
 
 bool ecs_has_position(entity_t e) {
+    if (e >= MAX_ENTITIES) return false;
     return has_position[e];
 }
 
 Position *ecs_get_position(entity_t e) {
+    if (e >= MAX_ENTITIES) return NULL;
     return &positions[e];
 }
 
 void ecs_add_rotation(entity_t e, Rotation r) {
+    if (e >= MAX_ENTITIES) return;
     rotations[e] = r;
     has_rotation[e] = true;
 }
 
 void ecs_remove_rotation(entity_t e) {
+    if (e >= MAX_ENTITIES) return;
     has_rotation[e] = false;
 }
 
 bool ecs_has_rotation(entity_t e) {
+    if (e >= MAX_ENTITIES) return false;
     return has_rotation[e];
 }
 
 Rotation *ecs_get_rotation(entity_t e) {
+    if (e >= MAX_ENTITIES) return NULL;
     return &rotations[e];
 }
 
 void ecs_add_scale(entity_t e, Scale s) {
+    if (e >= MAX_ENTITIES) return;
     scales[e] = s;
     has_scale[e] = true;
 }
 
 void ecs_remove_scale(entity_t e) {
+    if (e >= MAX_ENTITIES) return;
     has_scale[e] = false;
 }
 
 bool ecs_has_scale(entity_t e) {
+    if (e >= MAX_ENTITIES) return false;
     return has_scale[e];
 }
 
 Scale *ecs_get_scale(entity_t e) {
+    if (e >= MAX_ENTITIES) return NULL;
     return &scales[e];
 }
 
