@@ -46,6 +46,7 @@ void render_system_draw(T3DViewport *viewport) {
 
 void render_system_draw_2d(void) {
     rdpq_set_mode_standard();
+    rdpq_mode_blender(RDPQ_BLENDER_MULTIPLY);
 
     for (entity_t e = 0; e < MAX_ENTITIES; e++) {
         if (!entity_alive[e]) continue;
@@ -53,7 +54,6 @@ void render_system_draw_2d(void) {
         if (has_sprite[e]) {
             Sprite *s = &sprites[e];
             if (s->visible && s->sprite) {
-                rdpq_set_mode_standard();
                 rdpq_blitparms_t parms = {0};
                 parms.cx = s->sprite->width  / 2.0f;
                 parms.cy = s->sprite->height / 2.0f;
@@ -63,6 +63,7 @@ void render_system_draw_2d(void) {
             }
         }
 
+	/*
         if (has_triangle[e]) {
             Triangle *t = &triangles[e];
             float v1[2] = {t->v1x, t->v1y};
@@ -71,6 +72,7 @@ void render_system_draw_2d(void) {
             rdpq_set_mode_fill(t->color);
             rdpq_triangle(&TRIFMT_FILL, v1, v2, v3);
         }
+	*/
     }
 }
 
