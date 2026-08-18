@@ -29,6 +29,11 @@
 static entity_t tri_entity;
 static float elapsed;
 
+static sprite_t *smile = NULL;
+static entity_t smile_entity = MAX_ENTITIES;
+static sprite_t *dream = NULL;
+static entity_t dream_entity = MAX_ENTITIES;
+
 static xm64player_t music;
 
 void title_screen_init(void) {
@@ -45,6 +50,37 @@ void title_screen_init(void) {
         .color = RGBA32(0x5b, 0x6e, 0xe1, 0xff)
     };
     ecs_add_triangle(tri_entity, tri);
+
+    smile = sprite_load("rom:/sprites/smile.sprite");
+    dream = sprite_load("rom:/sprites/dream.sprite");
+
+    if (smile) {
+        smile_entity = ecs_create_entity();
+        if (smile_entity < MAX_ENTITIES) {
+            ecs_add_sprite(smile_entity, (Sprite){
+                .sprite   = smile,
+                .x        = 104.0f,
+                .y        = 120.0f,
+                .scale    = 1.0f,
+                .rotation = 0.0f,
+                .visible  = true,
+            });
+        }
+    }
+
+    if (dream) {
+        dream_entity = ecs_create_entity();
+        if (dream_entity < MAX_ENTITIES) {
+            ecs_add_sprite(dream_entity, (Sprite){
+                .sprite   = dream,
+                .x        = 216.0f,
+                .y        = 120.0f,
+                .scale    = 1.0f,
+                .rotation = 0.0f,
+                .visible  = true,
+            });
+        }
+    }
 
     xm64player_open(&music, "rom:/audio/convertable_drive.xm64");
     xm64player_play(&music, 0);
@@ -83,6 +119,24 @@ uint8_t title_screen_update(void) {
 
 uint8_t title_screen_exit(void) {
     ecs_destroy_entity(tri_entity);
+
+    if (smile_entity < MAX_ENTITIES) {
+        ecs_destroy_entity(smile_entity);
+        smile_entity = MAX_ENTITIES;
+    }
+    if (smile) {
+        sprite_free(smile);
+        smile = NULL;
+    }
+
+    if (dream_entity < MAX_ENTITIES) {
+        ecs_destroy_entity(dream_entity);
+        dream_entity = MAX_ENTITIES;
+    }
+    if (dream) {
+        sprite_free(dream);
+        dream = NULL;
+    }
 
     xm64player_stop(&music);
     xm64player_close(&music);
