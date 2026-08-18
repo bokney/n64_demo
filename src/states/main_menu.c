@@ -7,13 +7,18 @@
 
 #define MODEL_SCALE 0.1f
 #define MODEL_ROT_SPEED  0.03f
-#define CAM_FOV_SPEED    1.0f
+#define CAM_FOV_SPEED    0.5f
 #define CAM_FOV_MIN      20.0f
-#define CAM_FOV_MAX      90.0f
+#define CAM_FOV_MAX      120.0f
 
 static entity_t cam_entity = MAX_ENTITIES;
 static entity_t cube_entity = MAX_ENTITIES;
 static entity_t lighting_entity = MAX_ENTITIES;
+
+static sprite_t *smile = NULL;
+static entity_t smile_entity = MAX_ENTITIES;
+static sprite_t *dream = NULL;
+static entity_t dream_entity = MAX_ENTITIES;
 
 void main_menu_init(void) {
     cam_entity = ecs_create_entity();
@@ -43,6 +48,37 @@ void main_menu_init(void) {
         .direction = ldir,
         .is_active = true
     });
+
+        smile = sprite_load("rom:/sprites/smile.sprite");
+    dream = sprite_load("rom:/sprites/dream.sprite");
+
+    if (smile) {
+        smile_entity = ecs_create_entity();
+        if (smile_entity < MAX_ENTITIES) {
+            ecs_add_sprite(smile_entity, (Sprite){
+                .sprite   = smile,
+                .x        = 104.0f,
+                .y        = 120.0f,
+                .scale    = 1.0f,
+                .rotation = 0.0f,
+                .visible  = true,
+            });
+        }
+    }
+
+    if (dream) {
+        dream_entity = ecs_create_entity();
+        if (dream_entity < MAX_ENTITIES) {
+            ecs_add_sprite(dream_entity, (Sprite){
+                .sprite   = dream,
+                .x        = 216.0f,
+                .y        = 120.0f,
+                .scale    = 1.0f,
+                .rotation = 0.0f,
+                .visible  = true,
+            });
+        }
+    }
 }
 
 uint8_t main_menu_update(void) {
@@ -94,6 +130,23 @@ uint8_t main_menu_exit(void) {
     if (cam_entity != MAX_ENTITIES) {
         ecs_destroy_entity(cam_entity);
         cam_entity = MAX_ENTITIES;
+    }
+
+    if (smile_entity < MAX_ENTITIES) {
+        ecs_destroy_entity(smile_entity);
+        smile_entity = MAX_ENTITIES;
+    }
+    if (smile) {
+        sprite_free(smile);
+        smile = NULL;
+    }
+    if (dream_entity < MAX_ENTITIES) {
+        ecs_destroy_entity(dream_entity);
+        dream_entity = MAX_ENTITIES;
+    }
+    if (dream) {
+        sprite_free(dream);
+        dream = NULL;
     }
     return 0;
 }
