@@ -10,15 +10,10 @@
 static T3DViewport viewport;
 static bool viewport_initialized = false;
 
-static T3DMat4FP *model_mats = NULL;
+static T3DMat4FP model_mats[FB_COUNT];
 static int frame_idx = 0;
 
 void render_system_draw(T3DViewport *viewport) {
-    if (!model_mats) {
-        model_mats = malloc_uncached(sizeof(T3DMat4FP) * FB_COUNT);
-        frame_idx = 0;
-    }
-
     frame_idx = (frame_idx + 1) % FB_COUNT;
 
     for (entity_t e = 0; e < MAX_ENTITIES; e++) {
