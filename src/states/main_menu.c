@@ -49,7 +49,7 @@ void main_menu_init(void) {
         .is_active = true
     });
 
-        smile = sprite_load("rom:/sprites/smile.sprite");
+    smile = sprite_load("rom:/sprites/smile.sprite");
     dream = sprite_load("rom:/sprites/dream.sprite");
 
     if (smile) {
