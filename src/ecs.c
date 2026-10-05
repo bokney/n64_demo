@@ -24,8 +24,9 @@ entity_t ecs_create_entity(void) {
     return MAX_ENTITIES;
 }
 
-void ecs_destroy_entity(entity_t e) {
-    if (e >= MAX_ENTITIES) return;
+void ecs_destroy_entity(entity_t *entity) {
+    if (!entity || *entity >= MAX_ENTITIES) return;
+    entity_t e = *entity;
     entity_alive[e] = false;
     has_position[e] = false;
     has_rotation[e] = false;
@@ -38,6 +39,7 @@ void ecs_destroy_entity(entity_t e) {
     has_mesh[e] = false;
     has_input_mover[e] = false;
     has_lighting[e] = false;
+    *entity = MAX_ENTITIES;
 }
 
 void ecs_tick_logic(input_action_held_t input_action_held) {
