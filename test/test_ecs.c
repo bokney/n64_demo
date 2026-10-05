@@ -66,16 +66,20 @@ void test_ecs_create_entity_returns_sequential_ids(void) {
 
 void test_ecs_destroy_marks_entity_dead(void) {
     entity_t e = ecs_create_entity();
+    entity_t saved = e;
     TEST_ASSERT_TRUE(entity_alive[e]);
-    ecs_destroy_entity(e);
-    TEST_ASSERT_FALSE(entity_alive[e]);
+    ecs_destroy_entity(&e);
+    TEST_ASSERT_EQUAL_UINT16(MAX_ENTITIES, e);
+    TEST_ASSERT_FALSE(entity_alive[saved]);
 }
 
 void test_ecs_create_reuses_destroyed_slot(void) {
     entity_t e1 = ecs_create_entity();
-    ecs_destroy_entity(e1);
+    entity_t saved = e1;
+    ecs_destroy_entity(&e1);
     entity_t e2 = ecs_create_entity();
-    TEST_ASSERT_EQUAL_UINT16(e1, e2);
+    TEST_ASSERT_EQUAL_UINT16(saved, e2);
+    TEST_ASSERT_EQUAL_UINT16(MAX_ENTITIES, e1);
 }
 
 void test_ecs_create_returns_max_when_full(void) {
@@ -159,9 +163,11 @@ void test_ecs_has_position_false_for_new_entity(void) {
 
 void test_ecs_destroy_then_create_has_no_position(void) {
     entity_t e = ecs_create_entity();
+    entity_t saved = e;
     ecs_add_position(e, (Position){1, 2, 3});
-    ecs_destroy_entity(e);
+    ecs_destroy_entity(&e);
     entity_t e2 = ecs_create_entity();
+    TEST_ASSERT_FALSE(ecs_has_position(saved));
     TEST_ASSERT_FALSE(ecs_has_position(e2));
 }
 
@@ -217,13 +223,14 @@ void test_ecs_tick_logic_no_mover_no_movement(void) {
 
 void test_ecs_tick_logic_dead_entity_skipped(void) {
     entity_t e = ecs_create_entity();
+    entity_t saved = e;
     ecs_add_position(e, (Position){0, 0.0f, 0});
     ecs_add_input_mover(e, (InputMover){.speed = 10});
-    ecs_destroy_entity(e);
+    ecs_destroy_entity(&e);
     mock_up = true;
     ecs_tick_logic(mock_input_action_held);
-    TEST_ASSERT_FALSE(ecs_has_position(e));
-    TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.0f, ecs_get_position(e)->y);
+    TEST_ASSERT_FALSE(ecs_has_position(saved));
+    TEST_ASSERT_FLOAT_WITHIN(0.001f, 0.0f, ecs_get_position(saved)->y);
 }
 
 void test_ecs_tick_logic_moves_diagonal_up_left(void) {
@@ -238,13 +245,21 @@ void test_ecs_tick_logic_moves_diagonal_up_left(void) {
     TEST_ASSERT_FLOAT_WITHIN(0.001f, 7.0f, p->y);
 }
 
+void test_ecs_destroy_entity_resets_reference(void) {
+    entity_t e = ecs_create_entity();
+    ecs_destroy_entity(&e);
+    TEST_ASSERT_EQUAL_UINT16(MAX_ENTITIES, e);
+}
+
 void test_ecs_destroy_entity_idempotent(void) {
     entity_t e = ecs_create_entity();
+    entity_t saved = e;
     ecs_add_position(e, (Position){1, 2, 3});
-    ecs_destroy_entity(e);
-    ecs_destroy_entity(e);
-    TEST_ASSERT_FALSE(entity_alive[e]);
-    TEST_ASSERT_FALSE(ecs_has_position(e));
+    ecs_destroy_entity(&e);
+    TEST_ASSERT_EQUAL_UINT16(MAX_ENTITIES, e);
+    ecs_destroy_entity(&e);
+    TEST_ASSERT_FALSE(entity_alive[saved]);
+    TEST_ASSERT_FALSE(ecs_has_position(saved));
 }
 
 void test_ecs_accessor_sentinel_returns_safe_values(void) {
@@ -301,6 +316,7 @@ int main(void) {
     RUN_TEST(test_ecs_tick_logic_dead_entity_skipped);
     RUN_TEST(test_ecs_tick_logic_multiple_entities);
     RUN_TEST(test_ecs_tick_logic_moves_diagonal_up_left);
+    RUN_TEST(test_ecs_destroy_entity_resets_reference);
     RUN_TEST(test_ecs_destroy_entity_idempotent);
     RUN_TEST(test_ecs_accessor_sentinel_returns_safe_values);
     return UNITY_END();

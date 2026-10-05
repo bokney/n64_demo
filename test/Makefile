@@ -3,6 +3,7 @@ CFLAGS := -std=gnu17 -Wall -Wextra -I../src -Imocks -I../unity/src
 
 STATE_SRC := ../src/state.c
 ECS_SRC := ../src/ecs.c \
+           ../src/systems/transform_components.c \
            ../src/systems/input_components.c \
            ../src/systems/render_components.c \
            ../src/systems/lighting_components.c \
