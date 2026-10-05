@@ -33,6 +33,7 @@ void render_system_draw(T3DViewport *viewport) {
         float t[3] = {pos->x, pos->y, pos->z};
 
         t3d_mat4fp_from_srt_euler(&model_mats[frame_idx], s, r, t);
+        data_cache_hit_writeback(&model_mats[frame_idx], sizeof(T3DMat4FP));
         t3d_matrix_push(&model_mats[frame_idx]);
         t3d_model_draw(meshes[e].model);
         t3d_matrix_pop(1);
