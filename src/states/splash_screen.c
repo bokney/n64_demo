@@ -37,10 +37,7 @@ uint8_t splash_screen_update(void) {
 }
 
 uint8_t splash_screen_exit(void) {
-    if (logo_entity < MAX_ENTITIES) {
-        ecs_destroy_entity(logo_entity);
-        logo_entity = MAX_ENTITIES;
-    }
+    ecs_destroy_entity(&logo_entity);
     if (logo) {
         sprite_free(logo);
         logo = NULL;

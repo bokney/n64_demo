@@ -26,7 +26,7 @@
 #define AMP_V3_X 25.0f
 #define AMP_V3_Y 35.0f
 
-static entity_t tri_entity;
+static entity_t tri_entity = MAX_ENTITIES;
 static float elapsed;
 
 static sprite_t *smile = NULL;
@@ -118,21 +118,14 @@ uint8_t title_screen_update(void) {
 }
 
 uint8_t title_screen_exit(void) {
-    ecs_destroy_entity(tri_entity);
-
-    if (smile_entity < MAX_ENTITIES) {
-        ecs_destroy_entity(smile_entity);
-        smile_entity = MAX_ENTITIES;
-    }
+    ecs_destroy_entity(&tri_entity);
+    ecs_destroy_entity(&smile_entity);
     if (smile) {
         sprite_free(smile);
         smile = NULL;
     }
 
-    if (dream_entity < MAX_ENTITIES) {
-        ecs_destroy_entity(dream_entity);
-        dream_entity = MAX_ENTITIES;
-    }
+    ecs_destroy_entity(&dream_entity);
     if (dream) {
         sprite_free(dream);
         dream = NULL;
