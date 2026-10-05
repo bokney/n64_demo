@@ -20,6 +20,8 @@ static entity_t smile_entity = MAX_ENTITIES;
 static sprite_t *dream = NULL;
 static entity_t dream_entity = MAX_ENTITIES;
 
+static xm64player_t music;
+
 void main_menu_init(void) {
     cam_entity = ecs_create_entity();
     ecs_add_position(cam_entity, (Position){0.0f, 12.0f, 25.0f});
@@ -79,6 +81,8 @@ void main_menu_init(void) {
             });
         }
     }
+    xm64player_open(&music, "rom:/audio/FOG_ZONE_01.xm64");
+    xm64player_play(&music, 0);
 }
 
 uint8_t main_menu_update(void) {
@@ -108,42 +112,26 @@ uint8_t main_menu_update(void) {
     }
 
     if (input_action_pressed(ACTION_PAUSE)) {
-        return STATE_GAMEPLAY;
+        return STATE_SPLASH;
     }
 
     return 0;
 }
 
 uint8_t main_menu_exit(void) {
-    if (cube_entity != MAX_ENTITIES) {
-        Mesh *mesh = ecs_get_mesh(cube_entity);
-        if (mesh && mesh->model) {
-            t3d_model_free(mesh->model);
-        }
-        ecs_destroy_entity(cube_entity);
-        cube_entity = MAX_ENTITIES;
+    Mesh *mesh = ecs_get_mesh(cube_entity);
+    if (mesh && mesh->model) {
+        t3d_model_free(mesh->model);
     }
-    if (lighting_entity != MAX_ENTITIES) {
-        ecs_destroy_entity(lighting_entity);
-        lighting_entity = MAX_ENTITIES;
-    }
-    if (cam_entity != MAX_ENTITIES) {
-        ecs_destroy_entity(cam_entity);
-        cam_entity = MAX_ENTITIES;
-    }
-
-    if (smile_entity < MAX_ENTITIES) {
-        ecs_destroy_entity(smile_entity);
-        smile_entity = MAX_ENTITIES;
-    }
+    ecs_destroy_entity(&cube_entity);
+    ecs_destroy_entity(&lighting_entity);
+    ecs_destroy_entity(&cam_entity);
+    ecs_destroy_entity(&smile_entity);
     if (smile) {
         sprite_free(smile);
         smile = NULL;
     }
-    if (dream_entity < MAX_ENTITIES) {
-        ecs_destroy_entity(dream_entity);
-        dream_entity = MAX_ENTITIES;
-    }
+    ecs_destroy_entity(&dream_entity);
     if (dream) {
         sprite_free(dream);
         dream = NULL;

@@ -59,7 +59,6 @@ void render_system_draw_2d(void) {
             }
         }
 
-	/*
         if (has_triangle[e]) {
             Triangle *t = &triangles[e];
             float v1[2] = {t->v1x, t->v1y};
@@ -67,8 +66,9 @@ void render_system_draw_2d(void) {
             float v3[2] = {t->v3x, t->v3y};
             rdpq_set_mode_fill(t->color);
             rdpq_triangle(&TRIFMT_FILL, v1, v2, v3);
+            rdpq_set_mode_standard();
+            rdpq_mode_blender(RDPQ_BLENDER_MULTIPLY);
         }
-	*/
     }
 }
 
