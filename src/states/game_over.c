@@ -7,7 +7,7 @@ void game_over_init(void) {
 
 uint8_t game_over_update(void) {
     if (input_action_pressed(ACTION_CONFIRM)) {
-        return STATE_MAIN_MENU;
+        return STATE_SPLASH;
     }
     return 0;
 }
