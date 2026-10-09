@@ -106,13 +106,13 @@ uint8_t main_menu_update(void) {
             if (cam->fov > T3D_DEG_TO_RAD(CAM_FOV_MAX)) cam->fov = T3D_DEG_TO_RAD(CAM_FOV_MAX);
         }
 
-        if (input_action_pressed(ACTION_CONFIRM)) {
+        if (input_action_pressed(ACTION_PAUSE)) {
             rot->pitch = rot->yaw = rot->roll = 0.0f;
         }
     }
 
-    if (input_action_pressed(ACTION_PAUSE)) {
-        return STATE_SPLASH;
+    if (input_action_pressed(ACTION_CONFIRM)) {
+        return STATE_GAMEPLAY;
     }
 
     return 0;
@@ -136,5 +136,8 @@ uint8_t main_menu_exit(void) {
         sprite_free(dream);
         dream = NULL;
     }
+
+    xm64player_stop(&music);
+    xm64player_close(&music);
     return 0;
 }
